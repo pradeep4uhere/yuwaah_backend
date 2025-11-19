@@ -25,6 +25,7 @@ Route::middleware('auth')->group(function () {
     //
     Route::any('/getlearner', [ProfileController::class, 'getLearnerFromYuthHub'])->name('yuthhub.getlearner');
     Route::any('/alllearner', [ProfileController::class, 'allLearner'])->name('profile.alllearner');
+    Route::get('/get-event-categories', [ProfileController::class, 'getCategories']);
     
     
     

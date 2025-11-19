@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -10,7 +9,6 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\User;
 use App\Models\Learner;
-
 use Illuminate\Support\Facades\DB;
 use App\Models\EventTransactionComment;
 use Log;
@@ -213,72 +211,127 @@ class ProfileController extends Controller
     }
 
 
-    public function allEventTranscation(Request $request){
+    public function allEventTranscation(Request $request)
+    {
+        $eventTypeArray = DB::connection('mysql2')
+            ->table('yuwaah_event_type')
+            ->where('status', 1)
+            ->get();
 
-        try {
-            // Check if the connection works
-            $check = DB::connection('mysql2')->getPdo();
-            //dd($check);
-            //$event_transactions = DB::connection('mysql2')->table('event_transactions')->get()->toArray();
-            $event_transactions = DB::connection('mysql2')
-                ->table('event_transactions')
-                ->leftJoin('yuwaah_event_masters', 'event_transactions.event_category', '=', 'yuwaah_event_masters.id')
-                ->leftJoin('yuwaah_event_type', 'yuwaah_event_masters.event_type_id', '=', 'yuwaah_event_type.id')
-                ->select(
-                    'event_transactions.*',
-                    'yuwaah_event_masters.event_type as event_master_name',
-                    'yuwaah_event_masters.event_category as event_master_category',
-                    'yuwaah_event_masters.description as description',
-                    'yuwaah_event_masters.eligibility as eligibility',
-                    'yuwaah_event_masters.fee_per_completed_transaction as fee_per_completed_transaction',
-                    'yuwaah_event_masters.date_event_created_in_master as date_event_created_in_master',
-                    'yuwaah_event_masters.document_1 as document_1',
-                    'yuwaah_event_masters.document_2 as document_2',
-                    'yuwaah_event_masters.document_3 as document_3',
-                    'yuwaah_event_masters.status as status',
-                    'yuwaah_event_type.name as event_name'
-                )
-                ->orderBy('event_transactions.id', 'desc')
-                ->paginate(10); // 👈 paginate instead of get
-//            ->get()
-  //          ->toArray();
-            //dd( $event_transactions);
-            //dd($event_transactions);
-            $eventTransactionsArr = [];
-            foreach($event_transactions as $item){
-                $eventTransactionsArr['beneficiary_phone_number'] = $item->beneficiary_phone_number;
-                $eventTransactionsArr['beneficiary_name'] = $item->beneficiary_name;
-                $eventTransactionsArr['event_id'] = $item->event_id;
-                $eventTransactionsArr['event_type'] = $item->event_type;
-                $eventTransactionsArr['event_category'] = $item->event_category;
-                $eventTransactionsArr['event_name'] = $item->event_name;
-                $eventTransactionsArr['event_date_created'] = $item->event_date_created;
-                $eventTransactionsArr['event_date_submitted'] = $item->event_date_submitted;
-                $eventTransactionsArr['event_value'] = $item->event_value;
-                $eventTransactionsArr['ys_id'] = $item->ys_id;
-                $eventTransactionsArr['uploaded_doc_links'] = $item->uploaded_doc_links;
-                $eventTransactionsArr['comment'] = $item->comment;
-                $eventTransactionsArr['created_at'] = $item->created_at;
-                $eventTransactionsArr['updated_at'] = $item->updated_at;
-                // if($eventTransactionsArr['uploaded_doc_links']!=''){
-                //     $document = json_decode($eventTransactionsArr['uploaded_doc_links'],true);
-                //     //dd($document);
-                // }
-            }
-        } catch (\Exception $e) {
-            Log::error('Database connection or query failed: ' . $e->getMessage());
-        
-            return response()->json([
-                'success' => false,
-                'message' => 'Could not fetch event transaction data. Please check the database connection.',
-                'error' => $e->getMessage()
-            ], 500);
+        $eventCategoryArray = [];
+        if ($request->event_type > 0) {
+        //Get all Event Category
+        $eventCategoryArray = DB::connection('mysql2')
+            ->table('yuwaah_event_masters')
+            ->where('event_type_id', $request->event_type)
+            ->get();
         }
+    
+        $query = DB::connection('mysql2')
+            ->table('event_transactions')
+            ->leftJoin('yuwaah_event_masters', 'event_transactions.event_category', '=', 'yuwaah_event_masters.id')
+            ->leftJoin('yuwaah_event_type', 'yuwaah_event_masters.event_type_id', '=', 'yuwaah_event_type.id')
+            ->select(
+                'event_transactions.*',
+                'yuwaah_event_masters.event_type as event_master_name',
+                'yuwaah_event_masters.event_category as event_master_category',
+                'yuwaah_event_masters.description',
+                'yuwaah_event_masters.eligibility',
+                'yuwaah_event_masters.fee_per_completed_transaction',
+                'yuwaah_event_masters.date_event_created_in_master',
+                'yuwaah_event_masters.document_1',
+                'yuwaah_event_masters.document_2',
+                'yuwaah_event_masters.document_3',
+                'yuwaah_event_masters.status',
+                'yuwaah_event_type.name as event_name'
+            )
+            ->orderBy('event_transactions.id', 'desc');
+    
+          
+           
+        /* Apply filters only if values exist */
+        if ($request->filled('submit')) {
+
+            $query->where(function ($q) use ($request) {
         
-            return view('profile.alleventtransaction', [
-                'event_transactions' => $event_transactions,
-            ]);
+                // STATUS
+                if ($request->filled('status')) {
+                    if($request->status!=''){
+                        //dd($request->status);
+                        $q->orWhere('event_transactions.review_status', $request->status);
+                    }
+                }
+        
+                // EVENT TYPE
+                if ($request->event_type > 0) {
+                    //dd($request->event_type);
+                    $q->orWhere('yuwaah_event_type.id', $request->event_type);
+                }
+        
+                // EVENT CATEGORY
+                if ($request->event_category > 0) {
+                    $q->orWhere('event_transactions.event_category', $request->event_category);
+                }
+        
+                // DATE RANGE
+                if ($request->from_date != '' && $request->to_date != '') {
+                    $q->orWhereBetween('event_transactions.created_at', [
+                        $request->from_date,
+                        $request->to_date
+                    ]);
+                }
+                if ($request->filled('benificiery_name')) {
+                    $q->Where('event_transactions.beneficiary_name', 'like', "%{$request->benificiery_name}%");
+                }
+        
+                if ($request->filled('benificiery_mobile')) {
+                    $q->Where('event_transactions.beneficiary_phone_number', 'like', "%{$request->benificiery_mobile}%");
+                }
+        
+                if ($request->filled('search_text')) {
+                    $search = $request->search_text;
+                    $q->orWhere(function ($qq) use ($search) {
+                        $qq->where('event_transactions.beneficiary_name', 'like', "%$search%")
+                           ->orWhere('event_transactions.beneficiary_phone_number', 'like', "%$search%")
+                           ->orWhere('event_transactions.event_value', 'like', "%$search%");
+                    });
+                }
+        
+                // You can add more OR conditions here...
+            });
+        }
+    /*
+        if ($request->filled('benificiery_name')) {
+            $query->where('event_transactions.beneficiary_name', 'like', "%{$request->benificiery_name}%");
+        }
+    
+        if ($request->filled('benificiery_mobile')) {
+            $query->where('event_transactions.beneficiary_phone_number', 'like', "%{$request->benificiery_mobile}%");
+        }
+    
+        if ($request->filled('search_text')) {
+            $search = $request->search_text;
+            $query->where(function ($q) use ($search) {
+                $q->where('event_transactions.beneficiary_name', 'like', "%$search%")
+                  ->orWhere('event_transactions.beneficiary_phone_number', 'like', "%$search%")
+                  ->orWhere('event_transactions.event_value', 'like', "%$search%");
+            });
+        }*/
+        
+        
+    
+        $event_transactions = $query->paginate(50);
+        //dd($event_transactions);
+        
+        return view('profile.alleventtransaction', 
+        compact(
+            'event_transactions', 
+            'eventTypeArray',
+            'eventCategoryArray'
+        ));
     }
+    
+
 
 
 
@@ -520,6 +573,25 @@ public function allLearner(Request $request){
     return view('profile.alllearner', [
         'user' => $learner,
     ]);
+}
+
+
+
+
+
+
+public function getCategories(Request $request)
+{
+    $typeId = $request->event_type_id;
+
+    $query = DB::connection('mysql2')
+        ->table('yuwaah_event_masters');
+
+    if($typeId !== 'Open' && !empty($typeId)) {
+        $query->where('event_type_id', $typeId);
+    }
+
+    return response()->json($query->get());
 }
 
 

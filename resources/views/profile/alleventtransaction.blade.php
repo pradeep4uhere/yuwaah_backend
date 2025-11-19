@@ -4,7 +4,76 @@
             {{ __('All Event Transaction') }}
         </h2>
     </x-slot>
-    <div class="py-12">
+    <div class="py-4">
+        <div class="max-w-12xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                <div class="max-w-12xl">
+                <h2 class="font-bold text-xl text-gray-900">
+                        {{ __('Event Transaction filter') }}
+                    </h2>
+                 <div style="overflow-x: auto; margin-top:12px;">
+                    <form action="" method="post">
+                    @csrf
+                    <table class="table" style=" width: 100%; font-size: 15px; white-space: nowrap;">
+                        <tr>
+                        <th scope="col">Status</th>
+                        <th scope="col">Event Type</th>
+                        <th scope="col">Event Category</th>
+                        <th scope="col">Submitted Date From</th>
+                        <th scope="col">Submitted Date To</th>
+                        <th scope="col">Beneficiary Name</th>
+                        <th scope="col" nowrap="nowrap">Beneficiary Number</th>
+                        <th scope="col" nowrap="nowrap">Event Submitted Date</th>
+                        <th scope="col">&nbsp;</th>
+                        <th scope="col">&nbsp;</th>
+                        </tr>
+                    <tr>
+                        <th scope="col">
+                        <select class="form-control" name="status">
+                            <option value="">All</option>
+                            <option value="Open" {{ request('status') == 'Open' ? 'selected' : '' }}>Open</option>
+                            <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="Rejected" {{ request('status') == 'Rejected' ? 'selected' : '' }}>Rejected</option>
+                            <option value="Accepted" {{ request('status') == 'Accepted' ? 'selected' : '' }}>Accepted</option>
+                        </select>
+                        </th>
+                        <th scope="col">
+                        <select class="form-control" name="event_type" id="event_type">
+                            <option value="">All</option>
+                            @foreach($eventTypeArray as $item)
+                                <option value="{{ $item->id }}" {{ request('event_type') == $item->id ? 'selected' : '' }}>
+                                    {{ $item->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        </th>
+                        <th scope="col">
+                        <select class="form-control" name="event_category" id="event_category" style="min-width:285px">
+                            <option value="">All</option>
+                            @foreach($eventCategoryArray ?? [] as $cat)
+                                <option value="{{ $cat->id }}" {{ request('event_category') == $cat->id ? 'selected' : '' }}>
+                                    {{ $cat->event_category }}
+                                </option>
+                            @endforeach
+                        </select>
+                        </th>
+                        <th scope="col"><input type="date" name="from_date" class="form-control"
+                        value="{{ request('from_date') }}" /></th>
+                        <th scope="col"><input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}" /></th>
+                        <th scope="col"><input type="text" name="benificiery_name" class="form-control" value="{{ request('benificiery_name') }}"/></th>
+                        <th scope="col" nowrap="nowrap"><input type="text" name="benificiery_mobile" value="{{ request('benificiery_mobile') }}" /></th>
+                        <th scope="col" nowrap="nowrap"><input type="date" name="submitted_date" value="{{ request('submitted_date') }}"/></th>
+                        <th scope="col" nowrap="nowrap"><input type="submit" name="submit" class="btn  btn-primary" value="Search"/></th>
+                        <th scope="col" nowrap="nowrap"><a href="{{ url()->current() }}" class="btn btn-danger">Clear Filter</a></th>
+                        </tr>
+                    </table>
+                    </form>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="py-2">
         <div class="max-w-12xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                 <div class="max-w-12xl">
@@ -24,7 +93,7 @@
                         <th scope="col" nowrap="nowrap">Event Value</th>
                         <th scope="col">Document</th>
                         <th scope="col">Comment</th>
-                        <th scope="col">Created</th>
+                        <th scope="col">Last Updated</th>
                         <th scope="col">Actions</th>
                         </tr>
                     </thead>
@@ -39,7 +108,7 @@
                         <td nowrap="nowrap">{{$item->document_1}}<br>{{$item->document_2}}<br>{{$item->document_3}}</td>
                         <td nowrap="nowrap">{{$item->beneficiary_phone_number}}</td>
                         <td nowrap="nowrap">{{$item->beneficiary_name}}</td>
-                        <td nowrap="nowrap">{{$item->event_date_created}}</td>
+                        <td nowrap="nowrap">{{$item->updated_at}}</td>
                         <td nowrap="nowrap" style="font-weight: bold; color: {{ $item->event_date_submitted != '' ? 'green' : 'red' }}">
                             {{ $item->event_date_submitted != '' ? $item->event_date_submitted : 'NA' }}
                         </td>
