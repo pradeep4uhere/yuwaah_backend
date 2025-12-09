@@ -138,7 +138,8 @@ class FetchYuthHubLearners extends Command
                             'preferred_job_domain1'=>$profile['get_a_job_qualification'],
                             'preferred_job_domain2'=>$profile['get_a_job_when_can_start'],
                             'preferred_job_domain3'=>$profile['get_a_job_experiance'],
-                            'preferred_job_domain4'=>$profile['run_a_business']
+                            'preferred_job_domain4'=>$profile['run_a_business'],
+                            'create_date'=>$profile['create_date'],
                         ]
                     );
                 }
