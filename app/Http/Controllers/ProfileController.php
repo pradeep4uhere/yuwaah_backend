@@ -377,10 +377,15 @@ class ProfileController extends Controller
         //All Comment For this Event Trasnactions
         $commentList = EventTransactionComment::where('event_transaction_id',$id)->orderBy('id','desc')->get();
         //dd($commentList);
+        $industries = config('industries.industry_types');
+        $functions = config('jobfunction.functions');
+       // dd($functions);
         return view('profile.eventtransactiondetails', [
             'event_transactions' => $event_transactions,
             'event_transaction_id'=>$id,
-            'commentList'=>$commentList
+            'commentList'=>$commentList,
+            'industries'=>$industries,
+            'functions'=>$functions
         ]);
     }
 
@@ -411,6 +416,7 @@ class ProfileController extends Controller
             ]);
             $status = $request->input('review_status');
             //Update the Status into Event Transaction Table
+            //dd($request->input('field_type'));
             DB::connection('mysql2')
             ->table('event_transactions')
             ->where('id', $request->input('event_transaction_id'))

@@ -52,9 +52,9 @@
                         </td>
                         <td nowrap="nowrap" align="left" >
                             <label><strong>Status</strong></label>
-                            <select name="review_status"  class="form-select form-select-sm">
+                            <select name="review_status" id="review_status"  class="form-select form-select-sm">
                                 <option value="Open">Open</option>
-                                <option value="Pending">Pending</option>
+                                <option value="Return">Return</option>
                                 <option value="Rejected">Rejected</option>
                                 <option value="Accepted">Accepted</option>
                             </select>
@@ -68,11 +68,33 @@
                             </select>
                         </td>
                         <td>
-                        <label><strong>Field Type</strong></label>
-                        <select name="field_type"  class="form-select form-select-sm">
-                                <option value="Field Type-1">Field Type-1</option>
-                                <option value="Field Type-2">Field Type-2</option>
-                            </select>
+                        <label><strong>Function / Industry Type</strong></label>
+                        <select name="field_type" class="form-control" id="function_type"
+                            @if($event_transactions->event_name != 'Social Protection') 
+                                style="display:block" 
+                            @else 
+                                style="display:none" disabled 
+                            @endif
+                        >
+                            <option value="">Select Function</option>
+                            @foreach(($functions ?? []) as $fn)
+                                <option value="{{ $fn }}">{{ $fn }}</option>
+                            @endforeach
+                        </select>
+                        
+                        <select name="field_type" class="form-control" id="industry_type"
+                        @if($event_transactions->event_name == 'Social Protection') 
+                            style="display:block" 
+                        @else 
+                            style="display:none" disabled 
+                        @endif
+                    >
+                        <option value="">Select Industry</option>
+                        @foreach($industries as $industry)
+                            <option value="{{ $industry }}">{{ $industry }}</option>
+                        @endforeach
+                    </select>
+
                         </td>
                         <td nowrap="nowrap" class="align-middle">
                             <label><strong>&nbsp;&nbsp;&nbsp;</strong></label>
@@ -102,4 +124,23 @@
             </div>
         </div>
     </div>
+    @section('scripts')
+<script>
+$("#review_status").on("change", function () {
+let status = $(this).val();
+let eventName = "{{ $event_transactions->event_name }}";
+
+$("#function_type").hide().prop("disabled", true);
+$("#industry_type").hide().prop("disabled", true);
+
+if (status === "Accepted") {
+    if (eventName === "Social Protection") {
+        $("#industry_type").show().prop("disabled", false);
+    } else {
+        $("#function_type").show().prop("disabled", false);
+    }
+}
+});
+</script>
+@endsection
 </x-app-layout>

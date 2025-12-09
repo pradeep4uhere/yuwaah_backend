@@ -79,7 +79,7 @@
                     </tr>
                    
                     <tr style="font-size:13px">
-                        <td nowrap="nowrap"><strong>Field Type</strong></td>
+                        <td nowrap="nowrap"><strong>Function / Industry  Type</strong></td>
                         <td nowrap="nowrap" colspan="3">{{$event_transactions->field_type}}</td>
                     </tr>
                     <tr style="font-size:13px">

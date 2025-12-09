@@ -85,6 +85,7 @@
                         <th scope="col">Event Status</th>
                         <th scope="col">Event Name</th>
                         <th scope="col">Event Category</th>
+                        <th scope="col">Field Type</th>
                         <th scope="col">Required Docs</th>
                         <th scope="col">Number</th>
                         <th scope="col">Beneficiary Name</th>
@@ -105,6 +106,7 @@
                         {{$item->review_status}}</td>
                         <td nowrap="nowrap">{{$item->event_name}}</td>
                         <td nowrap="nowrap">{{$item->event_master_category}}</td>
+                        <td nowrap="nowrap">{{$item->field_type}}</td>
                         <td nowrap="nowrap">{{$item->document_1}}<br>{{$item->document_2}}<br>{{$item->document_3}}</td>
                         <td nowrap="nowrap">{{$item->beneficiary_phone_number}}</td>
                         <td nowrap="nowrap">{{$item->beneficiary_name}}</td>
