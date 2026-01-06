@@ -99,7 +99,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                    <?php if($event_transactions){ foreach($event_transactions as $item){ ?>
+                    <?php if($event_transactions){ foreach($event_transactions as $item){  if($item->review_status==''){ continue; }?>
                     <tr style="font-size:13px">
                         <th scope="row">{{$item->id}}</th>
                         <td nowrap="nowrap" style="font-weight: bold; color: {{ $item->review_status == 'Accepted' ? 'green' : 'red' }}">
