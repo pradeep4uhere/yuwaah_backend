@@ -15,6 +15,8 @@ use Log;
 use Google\Cloud\BigQuery\BigQueryClient;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
+use App\Exports\EventTransactionExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 
 class ProfileController extends Controller
@@ -599,6 +601,18 @@ public function getCategories(Request $request)
 
     return response()->json($query->get());
 }
+
+
+
+public function exportEventTransactions(Request $request)
+{
+    return Excel::download(
+        new EventTransactionExport($request),
+        'event_transactions.xlsx'
+    );
+  
+}
+
 
 
 

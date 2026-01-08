@@ -9,9 +9,10 @@
             <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                 <div class="max-w-12xl">
                 <h2 class="font-bold text-xl text-gray-900">
-                        {{ __('Event Transaction filter') }}
+                        {{ __('Event Transaction filter') }}&nbsp;
                     </h2>
                  <div style="overflow-x: auto; margin-top:12px;">
+                
                     <form action="" method="post">
                     @csrf
                     <table class="table" style=" width: 100%; font-size: 15px; white-space: nowrap;">
@@ -68,6 +69,12 @@
                         </tr>
                     </table>
                     </form>
+                    <div>
+                        <a href="{{ route('export-event-transactions') }}" class="btn btn-sm" style="display:flex;align-items:center;">
+                            <img src="{{ asset('download.png') }}" height="25" width="25" style="margin-right:8px;" />
+                            Export Event Transaction
+                        </a>
+                    </div>
                 </div>
                 </div>
             </div>
