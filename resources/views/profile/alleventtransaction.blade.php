@@ -30,7 +30,7 @@
                         </tr>
                     <tr>
                         <th scope="col">
-                        <select class="form-control" name="status">
+                        <select class="form-control" name="status" style=" width: 100px; font-size: 15px; white-space: nowrap;">
                             <option value="">All</option>
                             <option value="Open" {{ request('status') == 'Open' ? 'selected' : '' }}>Open</option>
                             <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
@@ -39,7 +39,7 @@
                         </select>
                         </th>
                         <th scope="col">
-                        <select class="form-control" name="event_type" id="event_type">
+                        <select class="form-control" name="event_type" id="event_type" style=" width: 150px; font-size: 15px; white-space: nowrap;">
                             <option value="">All</option>
                             @foreach($eventTypeArray as $item)
                                 <option value="{{ $item->id }}" {{ request('event_type') == $item->id ? 'selected' : '' }}>

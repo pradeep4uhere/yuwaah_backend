@@ -36,6 +36,30 @@
             </main>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+        <script>
+        $('#event_type').on('change', function () {
+            let eventTypeId = $(this).val();
+
+            $('#category').html('<option value="">Loading...</option>');
+
+            $.ajax({
+                url: "{{ route('get.categories') }}",
+                type: "GET",
+                data: { event_type_id: eventTypeId },
+                success: function (response) {
+                    let options = '<option value="">All Categories</option>';
+
+                    $.each(response, function (key, category) {
+                        options += `<option value="${category.id}">${category.event_category}</option>`;
+                    });
+
+                    $('#event_category').html(options);
+                }
+            });
+        });
+        </script>
         
     </body>
 </html>

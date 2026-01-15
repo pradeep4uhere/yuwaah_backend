@@ -27,6 +27,9 @@ Route::middleware('auth')->group(function () {
     Route::any('/alllearner', [ProfileController::class, 'allLearner'])->name('profile.alllearner');
     Route::get('/get-event-categories', [ProfileController::class, 'getCategories']);
     Route::get('/export-event-transactions', [ProfileController::class, 'exportEventTransactions'])->name('export-event-transactions');
+    Route::get('/get-categories', [ProfileController::class, 'getCategories'])
+    ->name('get.categories');
+
 
     
     
