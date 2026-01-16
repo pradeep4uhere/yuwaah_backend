@@ -73,14 +73,16 @@
                     </tr>
                     <tr style="font-size:13px">
                         <td nowrap="nowrap"><strong>Field Agent Name</strong></td>
-                        <td nowrap="nowrap">{{$event_transactions->field_agent_name}}</td>
+                        <td nowrap="nowrap">{{$event_transactions->field_agent_name}} [ {{$event_transactions->field_agent_id}} ]</td>
                         <td nowrap="nowrap"><strong>Field Agent Number</strong></td>
                         <td nowrap="nowrap">{{$event_transactions->field_agent_contact}}</td>
                     </tr>
                    
                     <tr style="font-size:13px">
-                        <td nowrap="nowrap"><strong>Function / Industry  Type</strong></td>
-                        <td nowrap="nowrap" colspan="3">{{$event_transactions->field_type}}</td>
+                        <td nowrap="nowrap"><strong>Function Type</strong></td>
+                        <td nowrap="nowrap" colspan="0">{{$event_transactions->field_type}}</td>
+                        <td nowrap="nowrap"><strong>Industry  Type</strong></td>
+                        <td nowrap="nowrap" colspan="0">{{$event_transactions->industry_type}}</td>
                     </tr>
                     <tr style="font-size:13px">
                         <td nowrap="nowrap"><strong>Event Transaction Status</strong></td>

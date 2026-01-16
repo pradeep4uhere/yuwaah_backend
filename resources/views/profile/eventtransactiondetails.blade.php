@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="max-w-12xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                 <div class="max-w-12xl">
                     @include('profile.partials.event-details')
@@ -68,32 +68,22 @@
                             </select>
                         </td>
                         <td>
-                        <label><strong>Function / Industry Type</strong></label>
-                        <select name="field_type" class="form-control" id="function_type"
-                            @if($event_transactions->event_name != 'Social Protection') 
-                                style="display:block" 
-                            @else 
-                                style="display:none" disabled 
-                            @endif
-                        >
+                        <label><strong>Function Type</strong></label>
+                        <select name="field_type" class="form-control" id="function_type">
                             <option value="">Select Function</option>
                             @foreach(($functions ?? []) as $fn)
-                                <option value="{{ $fn }}">{{ $fn }}</option>
+                                <option value="{{ $fn }}" @if($event_transactions->field_type == $fn) selected="selected" @endif>{{ $fn }}</option>
                             @endforeach
                         </select>
-                        
-                        <select name="field_type" class="form-control" id="industry_type"
-                        @if($event_transactions->event_name == 'Social Protection') 
-                            style="display:block" 
-                        @else 
-                            style="display:none" disabled 
-                        @endif
-                    >
+                        </td>
+                        <td>
+                        <label><strong> Industry Type</strong></label>
+                        <select name="industry_type" class="form-control" id="industry_type">
                         <option value="">Select Industry</option>
-                        @foreach($industries as $industry)
-                            <option value="{{ $industry }}">{{ $industry }}</option>
-                        @endforeach
-                    </select>
+                            @foreach($industries as $industry)
+                                <option value="{{ $industry }}" @if($event_transactions->industry_type == $industry) selected="selected" @endif>{{ $industry }}</option>
+                            @endforeach
+                        </select>
 
                         </td>
                         <td nowrap="nowrap" class="align-middle">
@@ -103,14 +93,14 @@
                         </tr>
                     @if($commentList)
                     <tr style="font-size:13px">
-                        <td nowrap="nowrap" class="align-middle" colspan="2"><strong>Comment</strong></td>
+                        <td nowrap="nowrap" class="align-middle" colspan="3"><strong>Comment</strong></td>
                         <td nowrap="nowrap" align="right" ><strong>Comment By</strong></td>
                         <td nowrap="nowrap" align="right"><strong>&nbsp;</strong></td>
                         <td nowrap="nowrap" align="right"><strong>Last Updated</strong></td>
                     </tr>
                     @foreach($commentList as $item)
                         <tr style="font-size:13px; background-color: {{ $item['comment_type'] == 'agent' ? '#FFD6D6' : 'transparent' }}">
-                            <td nowrap="nowrap"   colspan="2">{{ $item['comment'] }}</td>
+                            <td nowrap="nowrap"   colspan="3">{{ $item['comment'] }}</td>
                             <td nowrap="nowrap"  align="right">{{ $item['comment_type'] == 'agent' ? 'Agent- ' : '' }}{{ $item['user_name'] }}</td>
                             <td nowrap="nowrap" align="right">&nbsp;</td>
                             <td nowrap="nowrap" align="right">{{ $item['created_at'] }}</td>

@@ -233,6 +233,7 @@ class ProfileController extends Controller
             ->table('event_transactions')
             ->leftJoin('yuwaah_event_masters', 'event_transactions.event_category', '=', 'yuwaah_event_masters.id')
             ->leftJoin('yuwaah_event_type', 'yuwaah_event_masters.event_type_id', '=', 'yuwaah_event_type.id')
+            ->leftJoin('yuwaah_sakhi', 'event_transactions.ys_id', '=', 'yuwaah_sakhi.id')
             ->select(
                 'event_transactions.*',
                 'yuwaah_event_masters.event_type as event_master_name',
@@ -245,6 +246,9 @@ class ProfileController extends Controller
                 'yuwaah_event_masters.document_2',
                 'yuwaah_event_masters.document_3',
                 'yuwaah_event_masters.status',
+                'yuwaah_sakhi.csc_id',
+                'yuwaah_sakhi.name as field_agent_name',
+                'yuwaah_sakhi.sakhi_id',
                 'yuwaah_event_type.name as event_name'
             )
             ->orderBy('event_transactions.id', 'desc');
@@ -425,7 +429,8 @@ class ProfileController extends Controller
             ->update(
                 [
                     'review_status' => $status,
-                    'field_type' => $request->input('field_type')
+                    'field_type' => $request->input('field_type'),
+                    'industry_type' => $request->input('industry_type')
                 ]
             );
 

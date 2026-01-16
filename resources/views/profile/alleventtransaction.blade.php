@@ -92,7 +92,10 @@
                         <th scope="col">Event Status</th>
                         <th scope="col">Event Name</th>
                         <th scope="col">Event Category</th>
-                        <th scope="col">Field Type</th>
+                        <th scope="col">Field Agent</th>
+                        <th scope="col">Field Agent ID</th>
+                        <th scope="col">Function Type</th>
+                        <th scope="col">Industry Type</th>
                         <th scope="col">Required Docs</th>
                         <th scope="col">Number</th>
                         <th scope="col">Beneficiary Name</th>
@@ -107,13 +110,17 @@
                     </thead>
                     <tbody>
                     <?php if($event_transactions){ foreach($event_transactions as $item){  if($item->review_status==''){ continue; }?>
+                    
                     <tr style="font-size:13px">
-                        <th scope="row">{{$item->id}}</th>
+                        <th scope="row"><a href="{{route('event.edit',['id'=>$item->id])}}" class="">{{$item->id}}</a></th>
                         <td nowrap="nowrap" style="font-weight: bold; color: {{ $item->review_status == 'Accepted' ? 'green' : 'red' }}">
                         {{$item->review_status}}</td>
                         <td nowrap="nowrap">{{$item->event_name}}</td>
                         <td nowrap="nowrap">{{$item->event_master_category}}</td>
+                        <td nowrap="nowrap">{{$item->field_agent_name}}</td>
+                        <td nowrap="nowrap">{{$item->sakhi_id}}</td>
                         <td nowrap="nowrap">{{$item->field_type}}</td>
+                        <td nowrap="nowrap">{{$item->industry_type}}</td>
                         <td nowrap="nowrap">{{$item->document_1}}<br>{{$item->document_2}}<br>{{$item->document_3}}</td>
                         <td nowrap="nowrap">{{$item->beneficiary_phone_number}}</td>
                         <td nowrap="nowrap">{{$item->beneficiary_name}}</td>
