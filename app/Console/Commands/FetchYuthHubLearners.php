@@ -91,7 +91,7 @@ class FetchYuthHubLearners extends Command
                     } catch (\Exception $e) {
                         $dob = null;
                     }
-
+                    echo $profile['engilsh_proficiency_level'];
                     Learner::updateOrCreate(
                         // Lookup criteria — must be unique identifier, like email or external_id
                         ['primary_phone_number' => $profile['user_phone_number']],
