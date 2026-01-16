@@ -84,13 +84,16 @@ class FetchYuthHubLearners extends Command
                     $validGenders = ['Male', 'Female', 'Other'];
                     if (!in_array($gender, $validGenders)) $gender = 'Male';
 
-                    $dob = $profile['date_of_birth'] ?? null;
+                    $dob = $profile['date_of_birth'];
                     try {
                         $dob = (!empty($dob) && strtolower($dob) !== 'undefined')
-                            ? Carbon::parse($dob)->format('Y-m-d') : null;
+                            ? Carbon::createFromFormat('d/m/Y', $dob)->format('Y-m-d')
+                            : null;
                     } catch (\Exception $e) {
                         $dob = null;
                     }
+                    //echo '---'.$dob.'---';
+                    //echo "\n";
                     //echo $profile['engilsh_proficiency_level'];
                     Learner::updateOrCreate(
                         // Lookup criteria — must be unique identifier, like email or external_id
@@ -166,4 +169,18 @@ class FetchYuthHubLearners extends Command
 
 
     }
+
+
+
+
+    private function parseDate($date)
+    {
+        if (!$date) return null;
+        try {
+            return Carbon::parse($date)->format('Y-m-d');
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
 }
