@@ -99,8 +99,6 @@ class FetchYuthHubLearners extends Command
                             'first_name' => $profile['first_name'] ?? 'NA',
                             'last_name' => $profile['last_name'] ?? 'NA',
                             'email' => $profile['email_id'] ?? time().rand(100000,999999).'@yuthhub.com',
-                            'education_level' => $profile['education_level'] ?? null,
-                            'experience_years' => $profile['total_work_experiance'] ?? null,
                             'gender' => $gender,
                             'secondary_phone_number' => $profile['secondary_phone_number'] ?? null,
                             'current_job_title' => $profile['current_job_title'] ?? null,
@@ -139,6 +137,8 @@ class FetchYuthHubLearners extends Command
                             'preferred_job_domain2'=>$profile['get_a_job_when_can_start'],
                             'preferred_job_domain3'=>$profile['get_a_job_experiance'],
                             'preferred_job_domain4'=>$profile['run_a_business'],
+                            'english_knowledge'=> $profile['engilsh_proficiency_level'],
+                            'digital_proficiency'=> $profile['digital_proficiency_level'],
                             'create_date'=>$profile['create_date'],
                         ]
                     );
