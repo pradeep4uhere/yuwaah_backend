@@ -91,11 +91,11 @@ class FetchYuthHubLearners extends Command
                     $dob = preg_replace('/[^0-9\/]/', '', $dob);
                     $dob = trim($dob);
                     if($profile['first_name']=='Khushi'){
-                        //echo $dob;
-                        //var_dump($profile['date_of_birth']);
-                        //echo "DOB: [$dob]\n";
-                        //die;
-                        //die;
+                        echo $dob;
+                        var_dump($profile['date_of_birth']);
+                        echo "DOB: [$dob]\n";
+                        die;
+                        die;
                     }
                     try {
                         $dob = (!empty($dob) && strtolower($dob) !== 'undefined')
