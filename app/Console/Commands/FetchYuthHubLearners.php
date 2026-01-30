@@ -106,13 +106,13 @@ class FetchYuthHubLearners extends Command
                     }
                     //echo '---'.$dob.'---';
                     //echo "\n";
-                     if($profile['first_name']=='Khushi'){
-                        echo $dob;
-                        var_dump($profile['date_of_birth']);
-                        echo "DOB: [$dob]\n";
-                        die;
-                        die;
-                    }
+                    //  if($profile['first_name']=='Khushi'){
+                    //     echo $dob;
+                    //     var_dump($profile['date_of_birth']);
+                    //     echo "DOB: [$dob]\n";
+                    //     die;
+                    //     die;
+                    // }
                     //echo $profile['engilsh_proficiency_level'];
                     Learner::updateOrCreate(
                         // Lookup criteria — must be unique identifier, like email or external_id
