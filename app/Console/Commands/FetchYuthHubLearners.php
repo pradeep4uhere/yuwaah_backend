@@ -106,6 +106,13 @@ class FetchYuthHubLearners extends Command
                     }
                     //echo '---'.$dob.'---';
                     //echo "\n";
+                     if($profile['first_name']=='Khushi'){
+                        echo $dob;
+                        var_dump($profile['date_of_birth']);
+                        echo "DOB: [$dob]\n";
+                        die;
+                        die;
+                    }
                     //echo $profile['engilsh_proficiency_level'];
                     Learner::updateOrCreate(
                         // Lookup criteria — must be unique identifier, like email or external_id
@@ -132,7 +139,7 @@ class FetchYuthHubLearners extends Command
                             'MONTHLY_FAMILY_INCOME_RANGE'=>$profile['monthly_family_income_range'],
                             'USER_EMAIL'=>$profile['user_email'],
                             'DISTRICT_CITY'=>$profile['city'],
-                            'DISTRICT_CITY'=>$profile['loc_state'],
+                            'STATE'=>$profile['loc_state'],
                             'PIN_CODE'=>$profile['pin_code'],
                             'PROGRAM_CODE'=>$profile['program_code'],
                             'PROGRAM_STATE'=>$profile['institute_state'],
