@@ -54,7 +54,7 @@ class FetchYuthHubLearners extends Command
             $cleanToken = str_replace('Bearer ', '', $token);
 
             // Step 2: Loop with pagination
-            $page = 1;
+            $page = 9;
             $perPage = 1000;
             $totalRecords = null;
 
@@ -89,13 +89,9 @@ class FetchYuthHubLearners extends Command
                     // Decode URL encoded characters first
                     $dob = urldecode($dob);
                     $dob = preg_replace('/[^0-9\/]/', '', $dob);
-                    $dob = trim($dob);
                     //if($profile['first_name']=='Khushi'){
-                        // echo $dob;
-                        // var_dump($profile['date_of_birth']);
-                        // echo "DOB: [$dob]\n";
-                        // die;
-                        // die;
+                        //echo $dob;
+                        //die;
                     //}
                     try {
                         $dob = (!empty($dob) && strtolower($dob) !== 'undefined')
@@ -106,21 +102,26 @@ class FetchYuthHubLearners extends Command
                     }
                     //echo '---'.$dob.'---';
                     //echo "\n";
-                    //  if($profile['first_name']=='Khushi'){
-                    //     echo $dob;
-                    //     var_dump($profile['date_of_birth']);
-                    //     echo "DOB: [$dob]\n";
-                    //     die;
-                    //     die;
-                    // }
                     //echo $profile['engilsh_proficiency_level'];
+                    $csvPath = storage_path('app/student_updates.csv');
+                    $csvFile = fopen($csvPath, 'a'); // append mode
+
+                    // Optional: write header only if file is new
+                    if (filesize($csvPath) == 0) {
+                        fputcsv($csvFile, [
+                            'Updated DOB',
+                            'Original DOB',
+                            'First Name',
+                            'Phone Number'
+                        ]);
+                    }
                     Learner::updateOrCreate(
                         // Lookup criteria — must be unique identifier, like email or external_id
                         ['primary_phone_number' => $profile['user_phone_number']],
                         [
                             'first_name' => $profile['first_name'] ?? 'NA',
                             'last_name' => $profile['last_name'] ?? 'NA',
-                            'email' => $profile['email_id'] ?? time().rand(100000,999999).'@yuthhub.com',
+                            'email' => $profile['user_email'] ?? time().rand(100000,999999).'@yuthhub.com',
                             'gender' => $gender,
                             'secondary_phone_number' => $profile['secondary_phone_number'] ?? null,
                             'current_job_title' => $profile['current_job_title'] ?? null,
@@ -139,7 +140,7 @@ class FetchYuthHubLearners extends Command
                             'MONTHLY_FAMILY_INCOME_RANGE'=>$profile['monthly_family_income_range'],
                             'USER_EMAIL'=>$profile['user_email'],
                             'DISTRICT_CITY'=>$profile['city'],
-                            'STATE'=>$profile['loc_state'],
+                            'DISTRICT_CITY'=>$profile['loc_state'],
                             'PIN_CODE'=>$profile['pin_code'],
                             'PROGRAM_CODE'=>$profile['program_code'],
                             'PROGRAM_STATE'=>$profile['institute_state'],
@@ -164,7 +165,16 @@ class FetchYuthHubLearners extends Command
                             'create_date'=>$profile['create_date'],
                         ]
                     );
+
+//                    echo "Student Updated - ".$dob.' - '.$profile['date_of_birth'].' - '.$profile['first_name'].' - '.$profile['user_phone_number']."\n";
+                    fputcsv($csvFile, [
+                        $dob,
+                        $profile['date_of_birth'],
+                        $profile['first_name'],
+                        $profile['user_phone_number']
+                    ]);
                 }
+                fclose($csvFile);
 
                 // Log this fetch to api_fetch_log table
                 ApiFetchLog::create([
