@@ -115,7 +115,7 @@ class SyncYhubLearners extends Command
     // 2. Check if table is empty
     $isFirstTime = YhubLearner::count() === 0;
     $latestLoadDate = !$isFirstTime ? YhubLearner::max('load_date') : null;
-    $latestLoadDate = "2025-10-01"
+    $latestLoadDate = "2025-10-01";
 
     $this->info($isFirstTime
         ? 'First time loading: inserting all records...'
