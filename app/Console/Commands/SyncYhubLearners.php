@@ -152,28 +152,21 @@ class SyncYhubLearners extends Command
         $this->info("Filtered records to insert: " . count($filteredLearners));
 
         foreach (array_chunk($filteredLearners, 1000) as $chunk) {
+            $mobiles = [];
             foreach ($chunk as $data) {
                 if (!YhubLearner::where('email_address', $data['Email Address'])->exists()) {
                     YhubLearner::create([
-                        //'country'             => $data['Country'] ?? null,
                         'email_address'       => $data['Email Address'] ?? null,
-                        // 'user_id'             => $data['User ID'] ?? null,
-                        // 'first_name'          => $data['FirstName'] ?? null,
-                        // 'last_name'           => $data['LastName'] ?? null,
-                        // 'gender'              => $data['Gender'] ?? null,
-                        // 'role'                => $data['Role'] ?? null,
-                        // 'grade'               => $data['Grade'] ?? null,
-                        // 'state'               => $data['State'] ?? null,
-                        // 'district'            => $data['District'] ?? null,
-                        // 'school'              => $data['School'] ?? null,
-                        // 'course_name'         => $data['Course Name'] ?? null,
                         'completion_status' => (strtolower($data['Completed_1_Course']) == 'yes') ? 1 : 0,
-                        //'course_end_datetime' => isset($data['CourseEndDatetime']) ? date('Y-m-d H:i:s', strtotime($data['CourseEndDatetime'])) : null,
-                        //'completion_percent'  => $data['Completion %'] ?? null,
                         'load_date'           => isset($data['Load_Date']) ? date('Y-m-d', strtotime($data['Load_Date'])) : null,
                     ]);
                     $created++;
                 }
+            }
+            if ($mobiles) {
+                DB::table('learners')
+                    ->whereIn('normalized_mobile', $mobiles)
+                    ->update(['course_completed' => 1]);
             }
         }
     }
