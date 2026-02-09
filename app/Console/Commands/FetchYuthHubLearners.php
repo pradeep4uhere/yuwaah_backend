@@ -39,22 +39,36 @@ class FetchYuthHubLearners extends Command
         try {
             // Step 1: Get Token
             $loginResponse = Http::withHeaders([
+                'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
-            ])->post('https://youthhub.org/api/login', [
+            ])
+            ->timeout(30)           // total request timeout
+            ->connectTimeout(20)    // DNS / connection timeout
+            ->retry(3, 2000)        // retry 3 times with 2s gap
+            ->post('https://youthhub.org/api/login', [
                 'username' => 'powerbi',
                 'password' => 'MtufISqYihHdftiS'
             ]);
+            if (!$loginResponse->successful()) {
+                Log::error('YouthHub login failed', [
+                    'status' => $loginResponse->status(),
+                    'body'   => $loginResponse->body(),
+                ]);
+        
+                throw new \Exception('YouthHub login API failed');
+            }
 
             if (!$loginResponse->ok()) {
                 $this->error('Failed to authenticate with YuthHub.');
                 return;
             }
 
+
             $token = $loginResponse->json('accessToken');
             $cleanToken = str_replace('Bearer ', '', $token);
 
             // Step 2: Loop with pagination
-            $page = 9;
+            $page = 1;
             $perPage = 1000;
             $totalRecords = null;
 
@@ -126,6 +140,7 @@ class FetchYuthHubLearners extends Command
                             'secondary_phone_number' => $profile['secondary_phone_number'] ?? null,
                             'current_job_title' => $profile['current_job_title'] ?? null,
                             'date_of_birth' => $dob,
+                            'yuth_hub_dob'=> $profile['date_of_birth'],
                             'current_location_zip' => $profile['current_location_zip'] ?? null,
                             'profile_photo_url' => $profile['profile_photo_url'] ?? null,
                             'current_street' => isset($profile['current_address']) 
