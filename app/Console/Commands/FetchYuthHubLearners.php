@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Models\Learner; // if you're using the Learner model
 use App\Models\ApiFetchLog;
+use App\Models\ApiSyncLog;
 
 class FetchYuthHubLearners extends Command
 {
@@ -30,14 +31,30 @@ class FetchYuthHubLearners extends Command
      */
     public function handle()
     {
+       
         $this->info('Starting API data fetch...');
 
         $page = 1;
         $perPage = 1000;
         $totalRecords = null;
 
+        $totalFetched  = 0;
+        $totalInserted = 0;
+        $totalUpdated  = 0;
+
+       
+        // 🔹 Create DAILY run log
+        $syncRun = ApiSyncLog::create([
+            'api_name'    => 'YouthHub GPUD',
+            'run_date'    => now()->toDateString(),
+            'status'      => 'running',
+            'started_at'  => now(),
+        ]);
+
         try {
-            // Step 1: Get Token
+            /* ============================
+             * STEP 1: AUTHENTICATE
+             * ============================ */
             $loginResponse = Http::withHeaders([
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
@@ -50,12 +67,7 @@ class FetchYuthHubLearners extends Command
                 'password' => 'MtufISqYihHdftiS'
             ]);
             if (!$loginResponse->successful()) {
-                Log::error('YouthHub login failed', [
-                    'status' => $loginResponse->status(),
-                    'body'   => $loginResponse->body(),
-                ]);
-        
-                throw new \Exception('YouthHub login API failed');
+                throw new \Exception('YouthHub login failed');
             }
 
             if (!$loginResponse->ok()) {
@@ -71,14 +83,20 @@ class FetchYuthHubLearners extends Command
             $page = 1;
             $perPage = 1000;
             $totalRecords = null;
+            /* ============================
+             * STEP 2: PAGINATION LOOP
+             * ============================ */
 
             do {
                 $this->info("Fetching page: $page");
-
+                $lastCreatedAt = Learner::max('created_at');
+                $ma = $lastCreatedAt
+                ? Carbon::parse($lastCreatedAt)->addSecond()->timestamp
+                : null;
                 $userResponse = Http::withToken($cleanToken)->get('https://youthhub.org/api/gpud', [
                     'pn' => $page,
                     'ps' => $perPage,
-                    'ma' => ''
+                    'ma' => $ma // 🔥 incremental filter
                 ]);
 
                 if (!$userResponse->ok()) {
@@ -91,22 +109,20 @@ class FetchYuthHubLearners extends Command
                 $recordsFetched = count($users);
                 $totalRecords = (int) $responseData['totalRecordCount'];
                 $recordsRemaining = max($totalRecords - ($page * $perPage), 0);
+                $totalFetched += $recordsFetched;
 
                 foreach ($users as $index => $user) {
-                    $profile = $user['profileInfo'] ?? null;
+                    $profile = $user['profileInfo'] ?? [];
+
+                     /* ---- Gender fix ---- */
                     $gender = ucfirst(strtolower($profile['gender'] ?? 'Male'));
                     $validGenders = ['Male', 'Female', 'Other'];
                     if (!in_array($gender, $validGenders)) $gender = 'Male';
 
+                    /* ---- DOB handling ---- */
                     $dob = $profile['date_of_birth'];
-                    // Remove unwanted characters except numbers and /
-                    // Decode URL encoded characters first
                     $dob = urldecode($dob);
                     $dob = preg_replace('/[^0-9\/]/', '', $dob);
-                    //if($profile['first_name']=='Khushi'){
-                        //echo $dob;
-                        //die;
-                    //}
                     try {
                         $dob = (!empty($dob) && strtolower($dob) !== 'undefined')
                             ? Carbon::createFromFormat('d/m/Y', $dob)->format('Y-m-d')
@@ -114,22 +130,22 @@ class FetchYuthHubLearners extends Command
                     } catch (\Exception $e) {
                         $dob = null;
                     }
-                    //echo '---'.$dob.'---';
-                    //echo "\n";
-                    //echo $profile['engilsh_proficiency_level'];
-                    $csvPath = storage_path('app/student_updates.csv');
-                    $csvFile = fopen($csvPath, 'a'); // append mode
+                   
+                   
+                    //$csvPath = storage_path('app/student_updates.csv');
+                    //$csvFile = fopen($csvPath, 'a'); // append mode
 
                     // Optional: write header only if file is new
-                    if (filesize($csvPath) == 0) {
-                        fputcsv($csvFile, [
-                            'Updated DOB',
-                            'Original DOB',
-                            'First Name',
-                            'Phone Number'
-                        ]);
-                    }
-                    Learner::updateOrCreate(
+                    // if (filesize($csvPath) == 0) {
+                    //     fputcsv($csvFile, [
+                    //         'Updated DOB',
+                    //         'Original DOB',
+                    //         'First Name',
+                    //         'Phone Number'
+                    //     ]);
+                    // }
+                     /* ---- Insert / Update ---- */
+                    $learner =  Learner::updateOrCreate(
                         // Lookup criteria — must be unique identifier, like email or external_id
                         ['primary_phone_number' => $profile['user_phone_number']],
                         [
@@ -180,32 +196,50 @@ class FetchYuthHubLearners extends Command
                             'create_date'=>$profile['create_date'],
                         ]
                     );
+                    $learner->wasRecentlyCreated ? $totalInserted++ : $totalUpdated++;
 
-//                    echo "Student Updated - ".$dob.' - '.$profile['date_of_birth'].' - '.$profile['first_name'].' - '.$profile['user_phone_number']."\n";
-                    fputcsv($csvFile, [
+                    
+                    //echo "Student Updated - ".$dob.' - '.$profile['date_of_birth'].' - '.$profile['first_name'].' - '.$profile['user_phone_number']."\n";
+                    /*fputcsv($csvFile, [
                         $dob,
                         $profile['date_of_birth'],
                         $profile['first_name'],
                         $profile['user_phone_number']
-                    ]);
+                    ]);*/
                 }
-                fclose($csvFile);
-
-                // Log this fetch to api_fetch_log table
-                ApiFetchLog::create([
-                    'page_number' => $page,
-                    'records_fetched' => $recordsFetched,
-                    'total_records' => $totalRecords,
-                    'records_remaining' => $recordsRemaining,
-                ]);
-
-                $page++;
+                 /* ============================
+                     * PAGE LEVEL LOG
+                     * ============================ */
+                    ApiFetchLog::create([
+                        'page_number'      => $page,
+                        'records_fetched'  => $recordsFetched,
+                        'total_records'    => $totalRecords,
+                        'records_remaining' => $recordsRemaining,
+                    ]);
+                    $page++;
+                //fclose($csvFile);
+                
 
             } while ($recordsRemaining > 0);
-
+            /* ============================
+             * SUCCESS
+             * ============================ */
+            $syncRun->update([
+                'total_fetched'  => $totalFetched,
+                'total_inserted' => $totalInserted,
+                'total_updated'  => $totalUpdated,
+                'status'         => 'success',
+                'completed_at'   => now(),
+            ]);
             $this->info("All records fetched successfully.");
 
         } catch (\Exception $e) {
+           
+            $syncRun->update([
+                'status'        => 'failed',
+                'error_message' => $e->getMessage(),
+                'completed_at'  => now(),
+            ]);
             Log::error('Exception during learner fetch: ' . $e->getMessage());
             $this->error('An error occurred: ' . $e->getMessage());
         }
