@@ -24,10 +24,11 @@
                         <th scope="col">Submitted Date To</th>
                         <th scope="col">Beneficiary Name</th>
                         <th scope="col" nowrap="nowrap">Beneficiary Number</th>
-                        <th scope="col" nowrap="nowrap">Event Submitted Date</th>
+                       
                         <th scope="col">&nbsp;</th>
                         <th scope="col">&nbsp;</th>
                         </tr>
+                      
                     <tr>
                         <th scope="col">
                         <select class="form-control" name="status" style=" width: 100px; font-size: 15px; white-space: nowrap;">
@@ -63,18 +64,25 @@
                         <th scope="col"><input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}" /></th>
                         <th scope="col"><input type="text" name="benificiery_name" class="form-control" value="{{ request('benificiery_name') }}"/></th>
                         <th scope="col" nowrap="nowrap"><input type="text" name="benificiery_mobile" value="{{ request('benificiery_mobile') }}" /></th>
-                        <th scope="col" nowrap="nowrap"><input type="date" name="submitted_date" value="{{ request('submitted_date') }}"/></th>
-                        <th scope="col" nowrap="nowrap"><input type="submit" name="submit" class="btn  btn-primary" value="Search"/></th>
-                        <th scope="col" nowrap="nowrap"><a href="{{ url()->current() }}" class="btn btn-danger">Clear Filter</a></th>
+                       
                         </tr>
+                        <tr>
+                        <th scope="col" nowrap="nowrap">Event Submitted Date</th>
+                        <th scope="col" nowrap="nowrap"><input type="date" name="submitted_date" value="{{ request('submitted_date') }}"/></th>
+                        <th scope="col" nowrap="nowrap"><input type="submit" name="submit" class="btn  btn-primary" value="Search"/>&nbsp;
+                        <a href="{{ url()->current() }}" class="btn btn-danger">Clear Filter</a></th>
+                        <th coslapn="4">
+                        <div>
+                            <a href="{{ route('export-event-transactions') }}" class="btn " style="display:flex;align-items:center;">
+                                <img src="{{ asset('download.png') }}" height="25" width="25" style="margin-right:8px;" />
+                                Export Event Transaction
+                            </a>
+                        </div>
+                        </th>    
+                    </tr>
                     </table>
                     </form>
-                    <div>
-                        <a href="{{ route('export-event-transactions') }}" class="btn btn-sm" style="display:flex;align-items:center;">
-                            <img src="{{ asset('download.png') }}" height="25" width="25" style="margin-right:8px;" />
-                            Export Event Transaction
-                        </a>
-                    </div>
+                   
                 </div>
                 </div>
             </div>

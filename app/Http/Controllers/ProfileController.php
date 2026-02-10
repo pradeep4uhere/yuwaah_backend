@@ -264,14 +264,14 @@ class ProfileController extends Controller
                 if ($request->filled('status')) {
                     if($request->status!=''){
                         //dd($request->status);
-                        $q->orWhere('event_transactions.review_status', $request->status);
+                        $q->Where('event_transactions.review_status', $request->status);
                     }
                 }
         
                 // EVENT TYPE
                 if ($request->event_type > 0) {
                     //dd($request->event_type);
-                    $q->orWhere('yuwaah_event_type.id', $request->event_type);
+                    $q->Where('yuwaah_event_type.id', $request->event_type);
                 }
         
                 // EVENT CATEGORY
@@ -302,7 +302,7 @@ class ProfileController extends Controller
                            ->orWhere('event_transactions.event_value', 'like', "%$search%");
                     });
                 }
-        
+                
                 // You can add more OR conditions here...
             });
         }
@@ -326,7 +326,10 @@ class ProfileController extends Controller
         
         
     
-        $event_transactions = $query->paginate(50);
+        $event_transactions = $query
+        ->orderBy('event_transactions.review_status')
+        ->orderBy('event_transactions.id', 'desc')
+        ->paginate(50);
         //dd($event_transactions);
         
         return view('profile.alleventtransaction', 
