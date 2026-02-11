@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function (Illuminate\Console\Scheduling\Schedule $schedule) {
         $schedule->command('fetch:learners')->dailyAt('2:00');
         $schedule->command('yhub:sync-learners')->dailyAt('02:30');
+        $schedule->command('backup:mysql')->dailyAt('03:00');
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

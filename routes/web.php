@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\GoogleDriveController;
+
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -39,4 +41,6 @@ Route::middleware('auth')->group(function () {
 });
 Route::any('/bigquery', [ProfileController::class, 'allLearnerFromBigQueryList'])->name('bigquery.learner');
 Route::get('/bigquery-count', [ProfileController::class, 'countLearners']);
+Route::get('/upload-google-drive', [GoogleDriveController::class, 'upload'])
+    ->name('upload.google.drive');
 require __DIR__.'/auth.php';
