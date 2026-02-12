@@ -70,7 +70,63 @@ class GoogleDriveController extends Controller
     }
 
 
-    public function upload()
+//     public function upload()
+// {
+//     try {
+//         $client = $this->getClient();
+
+//         if (!session()->has('google_token')) {
+//             return redirect()->route('google.auth');
+//         }
+
+//         $client->setAccessToken(session('google_token'));
+
+//         if ($client->isAccessTokenExpired()) {
+//             $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+//             session(['google_token' => $client->getAccessToken()]);
+//         }
+
+//         $driveService = new \Google\Service\Drive($client);
+
+//         // ✅ Create ZIP first
+//         $zipFilePath = $this->createZipFromBackups(storage_path('app/backups'));
+
+//         if (!$zipFilePath || !file_exists($zipFilePath)) {
+//             return response()->json([
+//                 'status' => false,
+//                 'message' => 'ZIP file not created.'
+//             ]);
+//         }
+
+//         $fileMetadata = new \Google\Service\Drive\DriveFile([
+//             'name' => basename($zipFilePath),
+//             'parents' => ['1H8FW1j6URRbRAsTI1WaUKWth-oKZ506e'],
+//         ]);
+
+//         $content = file_get_contents($zipFilePath);
+
+//         $uploadedFile = $driveService->files->create($fileMetadata, [
+//             'data' => $content,
+//             'mimeType' => 'application/zip',
+//             'uploadType' => 'multipart',
+//         ]);
+
+//         return response()->json([
+//             'status' => true,
+//             'file_id' => $uploadedFile->id,
+//             'message' => 'Uploaded successfully.'
+//         ]);
+
+//     } catch (\Exception $e) {
+//         return response()->json([
+//             'status' => false,
+//             'message' => $e->getMessage()
+//         ]);
+//     }
+// }
+    
+
+public function upload()
 {
     try {
         $client = $this->getClient();
@@ -88,33 +144,44 @@ class GoogleDriveController extends Controller
 
         $driveService = new \Google\Service\Drive($client);
 
-        // ✅ Create ZIP first
-        $zipFilePath = $this->createZipFromBackups(storage_path('app/backups'));
+        $backupPath = storage_path('app/backups');
+        $files = glob($backupPath . '/*.sql.gz');
 
-        if (!$zipFilePath || !file_exists($zipFilePath)) {
+        if (empty($files)) {
             return response()->json([
                 'status' => false,
-                'message' => 'ZIP file not created.'
+                'message' => 'No .sql.gz files found.'
             ]);
         }
 
-        $fileMetadata = new \Google\Service\Drive\DriveFile([
-            'name' => basename($zipFilePath),
-            'parents' => ['1H8FW1j6URRbRAsTI1WaUKWth-oKZ506e'],
-        ]);
+        $uploadedFiles = [];
 
-        $content = file_get_contents($zipFilePath);
+        foreach ($files as $filePath) {
 
-        $uploadedFile = $driveService->files->create($fileMetadata, [
-            'data' => $content,
-            'mimeType' => 'application/zip',
-            'uploadType' => 'multipart',
-        ]);
+            if (!file_exists($filePath)) {
+                continue;
+            }
+
+            $fileMetadata = new \Google\Service\Drive\DriveFile([
+                'name' => basename($filePath),
+                'parents' => ['1H8FW1j6URRbRAsTI1WaUKWth-oKZ506e'], // Your Folder ID
+            ]);
+
+            $content = file_get_contents($filePath);
+
+            $uploadedFile = $driveService->files->create($fileMetadata, [
+                'data' => $content,
+                'mimeType' => 'application/gzip',
+                'uploadType' => 'multipart',
+            ]);
+
+            $uploadedFiles[] = $uploadedFile->id;
+        }
 
         return response()->json([
             'status' => true,
-            'file_id' => $uploadedFile->id,
-            'message' => 'Uploaded successfully.'
+            'uploaded_files' => $uploadedFiles,
+            'message' => 'All .sql.gz files uploaded successfully.'
         ]);
 
     } catch (\Exception $e) {
@@ -124,7 +191,6 @@ class GoogleDriveController extends Controller
         ]);
     }
 }
-    
 
 
 
