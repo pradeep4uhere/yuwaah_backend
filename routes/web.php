@@ -39,6 +39,12 @@ Route::middleware('auth')->group(function () {
     
     
 });
+Route::get('/google/auth', [GoogleDriveController::class, 'redirectToGoogle'])->name('google.auth');
+Route::get('/google/callback', [GoogleDriveController::class, 'handleGoogleCallback'])->name('google.callback');
+Route::get('/google/upload', [GoogleDriveController::class, 'upload']);
+
+
+
 Route::any('/bigquery', [ProfileController::class, 'allLearnerFromBigQueryList'])->name('bigquery.learner');
 Route::get('/bigquery-count', [ProfileController::class, 'countLearners']);
 Route::get('/upload-google-drive', [GoogleDriveController::class, 'upload'])

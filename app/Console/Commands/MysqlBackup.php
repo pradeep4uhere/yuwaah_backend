@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Log;
 
 class MysqlBackup extends Command
 {
@@ -19,6 +20,9 @@ class MysqlBackup extends Command
      * @var string
      */
     protected $description = 'Create MySQL database backup';
+
+
+   
 
     /**
      * Execute the console command.
@@ -37,7 +41,16 @@ class MysqlBackup extends Command
             mkdir($backupPath, 0755, true);
         }
 
-        $fileName = $dbName . '_' . date('Y-m-d_H-i-s') . '.sql';
+        // Delete old .sql.gz backup files
+        $files = glob($backupPath . '/*.sql.gz');
+
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }
+
+        $fileName = $dbName . '_' . date('Y-m-d_H-i-s') . '.sql.gz';
         $fullPath = $backupPath . '/' . $fileName;
 
         $command = "mysqldump --user={$dbUser} --password={$dbPass} --host={$dbHost} {$dbName} > {$fullPath}";
@@ -64,7 +77,11 @@ class MysqlBackup extends Command
 
         system($command);
 
+        //$this->uploadToDrive($fullPath);
+
         $this->info("Backup created: " . $fileName);
+        \Log::info('Backup uploaded successfully.');
 
     }
+
 }
