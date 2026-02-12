@@ -6,7 +6,7 @@
 <section class="space-y-6">
     <header>
         <h2 class="text-lg font-medium text-gray-900">
-            {{ __('Event Details') }}
+            {{ __('Event Details') }}&nbsp;[#{{$event_transactions->id}}]
         </h2>
         <p class="mt-1 text-sm text-gray-600">
             {{ $event_transactions?->description ?? '' }}
