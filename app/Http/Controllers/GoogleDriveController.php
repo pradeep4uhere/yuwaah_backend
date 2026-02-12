@@ -26,8 +26,8 @@ class GoogleDriveController extends Controller
         $client->setAuthConfig(storage_path('app/google-oauth.json'));
         $client->addScope(\Google_Service_Drive::DRIVE);
         $client->setRedirectUri(route('google.callback'));
-        $client->setAccessType('offline');
-        $client->setPrompt('consent');
+        $client->setAccessType('online');
+        $client->setPrompt('auto    ');
         $client->addScope('https://www.googleapis.com/auth/drive.file');
 
         return $client;
