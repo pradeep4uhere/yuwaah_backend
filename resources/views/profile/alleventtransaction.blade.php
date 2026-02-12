@@ -13,7 +13,7 @@
                     </h2>
                  <div style="overflow-x: auto; margin-top:12px;">
                 
-                    <form action="" method="post">
+                    <form action="" method="get">
                     @csrf
                     <table class="table" style=" width: 100%; font-size: 15px; white-space: nowrap;">
                         <tr>
@@ -173,7 +173,7 @@
                 </tbody>
 
                     </table>
-                    {{ $event_transactions->links() }}
+                    {{ $event_transactions->appends(request()->query())->links() }}
                 </div>
                 </div>
             </div>
