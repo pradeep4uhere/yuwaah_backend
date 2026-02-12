@@ -71,64 +71,59 @@ class GoogleDriveController extends Controller
 
 
     public function upload()
-    {
-        try {
-            $client = $this->getClient();
-    
-            if (!session()->has('google_token')) {
-                return redirect()->route('google.auth');
-            }
-    
-            $client->setAccessToken(session('google_token'));
-    
-            // Refresh token if expired
-            if ($client->isAccessTokenExpired()) {
-                $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
-                session(['google_token' => $client->getAccessToken()]);
-            }
-    
-            $driveService = new \Google\Service\Drive($client);
-            $zipFilePath = $this->createZipFromBackups(storage_path('app/backups/'));
+{
+    try {
+        $client = $this->getClient();
 
-            if (!$zipFilePath || !file_exists($zipFilePath)) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'ZIP file not created or not found.'
-                ]);
-            }
-    
-            $filePath = $zipFilePath; 
-    
-            $fileMetadata = new \Google\Service\Drive\DriveFile([
-                'name' => basename($filePath),
-                'parents' => ['1H8FW1j6URRbRAsTI1WaUKWth-oKZ506e'], // 👈 VERY IMPORTANT
-            ]);
-    
-            $content = file_get_contents($filePath);
-    
-            $uploadedFile = $driveService->files->create($fileMetadata, [
-                'data' => $content,
-                'mimeType' => 'application/gzip',
-                'uploadType' => 'multipart',
-            ]);
+        if (!session()->has('google_token')) {
+            return redirect()->route('google.auth');
+        }
 
-            //dd($uploadedFile);
-            if($uploadedFile->id){
-                $this->deleteOldFiles(storage_path('app/backups/'));
-                return response()->json([
-                    'status' => true,
-                    'file_id' => $uploadedFile->id,
-                    'message' => 'Uploaded to YOUR Google Drive (2TB storage).'
-                ]);
-            }
-    
-        } catch (\Exception $e) {
+        $client->setAccessToken(session('google_token'));
+
+        if ($client->isAccessTokenExpired()) {
+            $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+            session(['google_token' => $client->getAccessToken()]);
+        }
+
+        $driveService = new \Google\Service\Drive($client);
+
+        // ✅ Create ZIP first
+        $zipFilePath = $this->createZipFromBackups(storage_path('app/backups'));
+
+        if (!$zipFilePath || !file_exists($zipFilePath)) {
             return response()->json([
                 'status' => false,
-                'message' => $e->getMessage()
+                'message' => 'ZIP file not created.'
             ]);
         }
+
+        $fileMetadata = new \Google\Service\Drive\DriveFile([
+            'name' => basename($zipFilePath),
+            'parents' => ['1H8FW1j6URRbRAsTI1WaUKWth-oKZ506e'],
+        ]);
+
+        $content = file_get_contents($zipFilePath);
+
+        $uploadedFile = $driveService->files->create($fileMetadata, [
+            'data' => $content,
+            'mimeType' => 'application/zip',
+            'uploadType' => 'multipart',
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'file_id' => $uploadedFile->id,
+            'message' => 'Uploaded successfully.'
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => false,
+            'message' => $e->getMessage()
+        ]);
     }
+}
     
 
 
