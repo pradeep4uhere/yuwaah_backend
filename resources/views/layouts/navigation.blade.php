@@ -15,15 +15,16 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('profile.allusers')" :active="request()->routeIs('allusers')">
-                        {{ __('All Users') }}
+                     <x-nav-link :href="route('profile.allevent')" :active="request()->routeIs('allevents')">
+                        {{ __('All Events') }}
                     </x-nav-link>
                     <x-nav-link :href="route('profile.alllearner')" :active="request()->routeIs('allevents')">
                         {{ __('All Learner') }}
                     </x-nav-link>
-                     <x-nav-link :href="route('profile.allevent')" :active="request()->routeIs('allevents')">
-                        {{ __('All Events') }}
+                    <x-nav-link :href="route('profile.allusers')" :active="request()->routeIs('allusers')">
+                        {{ __('All Users') }}
                     </x-nav-link>
+                
                 </div>
             </div>
 
