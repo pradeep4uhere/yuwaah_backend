@@ -25,6 +25,7 @@
                         <th scope="col">Beneficiary Name</th>
                         <th scope="col" nowrap="nowrap">Beneficiary Number</th>
                        
+                       
                         <th scope="col">&nbsp;</th>
                         <th scope="col">&nbsp;</th>
                         </tr>
@@ -107,6 +108,8 @@
                         <th scope="col">Required Docs</th>
                         <th scope="col">Number</th>
                         <th scope="col">Beneficiary Name</th>
+                        <th scope="col">Beneficiary State</th>
+                        <th scope="col">Beneficiary District</th>
                         <th scope="col" nowrap="nowrap">Event Created</th>
                         <th scope="col" nowrap="nowrap">Event Submitted</th>
                         <th scope="col" nowrap="nowrap">Event Value</th>
@@ -132,6 +135,8 @@
                         <td nowrap="nowrap">{{$item->document_1}}<br>{{$item->document_2}}<br>{{$item->document_3}}</td>
                         <td nowrap="nowrap">{{$item->beneficiary_phone_number}}</td>
                         <td nowrap="nowrap">{{$item->beneficiary_name}}</td>
+                        <td nowrap="nowrap">{{$item->PROGRAM_STATE}}</td>
+                        <td nowrap="nowrap">{{$item->PROGRAM_DISTRICT}}</td>
                         <td nowrap="nowrap">{{$item->updated_at}}</td>
                         <td nowrap="nowrap" style="font-weight: bold; color: {{ $item->event_date_submitted != '' ? 'green' : 'red' }}">
                             {{ $item->event_date_submitted != '' ? $item->event_date_submitted : 'NA' }}

@@ -234,6 +234,7 @@ class ProfileController extends Controller
             ->leftJoin('yuwaah_event_masters', 'event_transactions.event_category', '=', 'yuwaah_event_masters.id')
             ->leftJoin('yuwaah_event_type', 'yuwaah_event_masters.event_type_id', '=', 'yuwaah_event_type.id')
             ->leftJoin('yuwaah_sakhi', 'event_transactions.ys_id', '=', 'yuwaah_sakhi.id')
+            ->join('learners', 'learners.id', '=', 'event_transactions.learner_id')
             ->select(
                 'event_transactions.*',
                 'yuwaah_event_masters.event_type as event_master_name',
@@ -249,7 +250,9 @@ class ProfileController extends Controller
                 'yuwaah_sakhi.csc_id',
                 'yuwaah_sakhi.name as field_agent_name',
                 'yuwaah_sakhi.sakhi_id',
-                'yuwaah_event_type.name as event_name'
+                'yuwaah_event_type.name as event_name',
+                'learners.PROGRAM_STATE',
+                'learners.PROGRAM_DISTRICT'
             )
             ->orderBy('event_transactions.id', 'desc');
     
