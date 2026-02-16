@@ -16,13 +16,13 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
                      <x-nav-link :href="route('profile.allevent')" :active="request()->routeIs('allevents')">
-                        {{ __('All Events') }}
+                        {{ __('Events') }}
                     </x-nav-link>
                     <x-nav-link :href="route('profile.alllearner')" :active="request()->routeIs('allevents')">
-                        {{ __('All Learner') }}
+                        {{ __('Learner') }}
                     </x-nav-link>
                     <x-nav-link :href="route('profile.allusers')" :active="request()->routeIs('allusers')">
-                        {{ __('All Users') }}
+                        {{ __('Users') }}
                     </x-nav-link>
                 
                 </div>

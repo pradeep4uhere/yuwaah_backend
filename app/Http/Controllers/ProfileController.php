@@ -361,6 +361,7 @@ class ProfileController extends Controller
         ->join('yuwaah_event_masters', 'event_transactions.event_category', '=', 'yuwaah_event_masters.id')
         ->join('yuwaah_event_type', 'yuwaah_event_type.id', '=', 'yuwaah_event_masters.event_type_id')
         ->join('yuwaah_sakhi', 'yuwaah_sakhi.id', '=', 'event_transactions.ys_id')
+        ->join('learners', 'learners.id', '=', 'event_transactions.learner_id')
         ->select(
             'event_transactions.*',
             'yuwaah_event_type.name as event_name',
@@ -376,6 +377,9 @@ class ProfileController extends Controller
             'yuwaah_event_masters.status as status',
             'yuwaah_sakhi.sakhi_id as field_agent_id',
             'yuwaah_sakhi.name as field_agent_name',
+            'learners.PROGRAM_STATE',
+            'learners.PROGRAM_DISTRICT',
+            
             'yuwaah_sakhi.contact_number as field_agent_contact'
         )
         ->where('event_transactions.id', '=', $id)

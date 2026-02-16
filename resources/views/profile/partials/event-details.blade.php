@@ -26,6 +26,12 @@
                         <td nowrap="nowrap"><strong>Beneficiary Number</strong></td>
                         <td nowrap="nowrap">{{$event_transactions->beneficiary_phone_number}}</td>
                     </tr>
+                    <tr style="font-size:13px">
+                        <td nowrap="nowrap"><strong>Beneficiary State</strong></td>
+                        <td nowrap="nowrap">{{$event_transactions->PROGRAM_STATE}}</td>
+                        <td nowrap="nowrap"><strong>Beneficiary District</strong></td>
+                        <td nowrap="nowrap">{{$event_transactions->PROGRAM_DISTRICT}}</td>
+                    </tr>
                    
                     <tr style="font-size:13px">
                         <td nowrap="nowrap"><strong>Event Value</strong></td>
