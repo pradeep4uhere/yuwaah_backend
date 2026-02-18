@@ -279,6 +279,10 @@ class ProfileController extends Controller
                 $q->where('event_transactions.benificiery_name', 'like', "%{$request->benificiery_name}%");
             });
 
+            $baseQuery->when($request->filled('id'), function ($q) use ($request) {
+                $q->where('event_transactions.id', '=', $request->id);
+            });
+
             $baseQuery->when($request->filled('benificiery_mobile'), function ($q) use ($request) {
                 $q->where('event_transactions.beneficiary_phone_number', 'like', "%{$request->benificiery_mobile}%");
             });

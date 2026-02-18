@@ -85,7 +85,7 @@
                         <th scope="col">Event Submitted Date</th>
                         <th scope="col">Agent ID</th>
                         <th scope="col">Program Code</th>
-                        <th scope="col">&nbsp;</th>
+                        <th scope="col">Event Number</th>
                         <th scope="col">&nbsp;</th>
                         <th scope="col">&nbsp;</th>
                         <th scope="col" nowrap="nowrap">&nbsp;</th>
@@ -106,7 +106,7 @@
                                 @endforeach
                             </select>
                         </td>
-                        <td>&nbsp;</td>
+                        <td scope="col"><input  class="form-control" type="text" name="id"  value="{{ request('id') }}"/></td>
                         <td>&nbsp;</td>
                         <td scope="col" nowrap="nowrap"><input type="submit" name="submit" class="btn  btn-primary" value="Search"/>
                          &nbsp;<a href="{{ url()->current() }}" class="btn btn-danger">Clear Filter</a></td>
