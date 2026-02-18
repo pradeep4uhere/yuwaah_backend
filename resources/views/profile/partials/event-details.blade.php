@@ -17,27 +17,38 @@
                     <tr style="font-size:13px">
                         <td nowrap="nowrap"><strong>Event Name</strong></td>
                         <td nowrap="nowrap">{{$event_transactions->event_name}}</td>
-                        <td nowrap="nowrap"><strong>Event Category</strong></td>
-                        <td nowrap="nowrap">{{$event_transactions->event_master_category}}</td>
-                    </tr>
-                    <tr style="font-size:13px">
                         <td nowrap="nowrap"><strong>Beneficiary Name</strong></td>
                         <td nowrap="nowrap">{{$event_transactions->beneficiary_name}}</td>
+                       
+                    </tr>
+                    <tr style="font-size:13px">
+                     
+                        <td nowrap="nowrap"><strong>Event Category</strong></td>
+                        <td nowrap="nowrap">{{$event_transactions->event_master_category}}</td>
                         <td nowrap="nowrap"><strong>Beneficiary Number</strong></td>
                         <td nowrap="nowrap">{{$event_transactions->beneficiary_phone_number}}</td>
                     </tr>
                     <tr style="font-size:13px">
+                        <td nowrap="nowrap"><strong>Event Value</strong></td>
+
+                        <td nowrap="nowrap">{{$event_transactions->event_value}}</td>
                         <td nowrap="nowrap"><strong>Beneficiary State</strong></td>
                         <td nowrap="nowrap">{{$event_transactions->PROGRAM_STATE}}</td>
-                        <td nowrap="nowrap"><strong>Beneficiary District</strong></td>
-                        <td nowrap="nowrap">{{$event_transactions->PROGRAM_DISTRICT}}</td>
                     </tr>
                    
                     <tr style="font-size:13px">
-                        <td nowrap="nowrap"><strong>Event Value</strong></td>
-                        <td nowrap="nowrap">{{$event_transactions->event_value}}</td>
+                   
+                       
                         <td nowrap="nowrap"><strong>Monthly Salary / Income (INR)</strong></td>
                         <td nowrap="nowrap">{{$event_transactions->event_value}}</td>
+                        <td nowrap="nowrap"><strong>Beneficiary District</strong></td>
+                        <td nowrap="nowrap">{{$event_transactions->PROGRAM_DISTRICT}}</td>
+
+                   
+                       
+                    </tr>
+                    <tr style="font-size:13px">
+                        <td nowrap="nowrap" colspan="4"><strong>&nbsp;</strong></td>
                     </tr>
                     <tr style="font-size:13px">
                         <td nowrap="nowrap"><strong>Document Required</strong></td>
@@ -78,12 +89,21 @@
                         <td nowrap="nowrap">{{$event_transactions->event_date_submitted}} &nbsp; ✅</td>
                     </tr>
                     <tr style="font-size:13px">
+                        <td nowrap="nowrap" colspan="4"><strong>&nbsp;</strong></td>
+                    </tr>
+                    <tr style="font-size:13px">
                         <td nowrap="nowrap"><strong>Field Agent Name</strong></td>
                         <td nowrap="nowrap">{{$event_transactions->field_agent_name}} [ {{$event_transactions->field_agent_id}} ]</td>
                         <td nowrap="nowrap"><strong>Field Agent Number</strong></td>
                         <td nowrap="nowrap">{{$event_transactions->field_agent_contact}}</td>
                     </tr>
                    
+                    <tr style="font-size:13px">
+                        <td nowrap="nowrap"><strong>Program Code </strong></td>
+                        <td nowrap="nowrap" colspan="0">{{$event_transactions->PROGRAM_CODE}}</td>
+                        <td nowrap="nowrap"><strong>&nbsp;</strong></td>
+                        <td nowrap="nowrap" colspan="0">&nbsp;</td>
+                    </tr>
                     <tr style="font-size:13px">
                         <td nowrap="nowrap"><strong>Function Type</strong></td>
                         <td nowrap="nowrap" colspan="0">{{$event_transactions->field_type}}</td>

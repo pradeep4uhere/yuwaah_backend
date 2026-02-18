@@ -15,6 +15,7 @@ class EventTransactionComment extends Model
         'event_transaction_id',
         'user_id',
         'user_name',
+        'status',
         'comment_type'
     ];
 }

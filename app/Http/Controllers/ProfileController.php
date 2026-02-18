@@ -215,26 +215,80 @@ class ProfileController extends Controller
 
     public function allEventTranscation(Request $request)
     {
-        $eventTypeArray = DB::connection('mysql2')
-            ->table('yuwaah_event_type')
-            ->where('status', 1)
-            ->get();
 
-        $eventCategoryArray = [];
-        if ($request->event_type > 0) {
-        //Get all Event Category
-        $eventCategoryArray = DB::connection('mysql2')
-            ->table('yuwaah_event_masters')
-            ->where('event_type_id', $request->event_type)
-            ->get();
-        }
-    
-        $query = DB::connection('mysql2')
+            //All Program Code 
+
+        
+            $programCode = DB::connection('mysql2')
+                ->table('partners')
+                ->select('name')
+                ->where('status', 1)
+                ->get();
+
+            //dd($programCode);
+                
+            $eventTypeArray = DB::connection('mysql2')
+                ->table('yuwaah_event_type')
+                ->where('status', 1)
+                ->get();
+
+            $eventCategoryArray = [];
+            if ($request->event_type > 0) {
+            //Get all Event Category
+            $eventCategoryArray = DB::connection('mysql2')
+                ->table('yuwaah_event_masters')
+                ->where('event_type_id', $request->event_type)
+                ->get();
+            }
+
+
+            $baseQuery = DB::connection('mysql2')
             ->table('event_transactions')
             ->leftJoin('yuwaah_event_masters', 'event_transactions.event_category', '=', 'yuwaah_event_masters.id')
             ->leftJoin('yuwaah_event_type', 'yuwaah_event_masters.event_type_id', '=', 'yuwaah_event_type.id')
             ->leftJoin('yuwaah_sakhi', 'event_transactions.ys_id', '=', 'yuwaah_sakhi.id')
             ->join('learners', 'learners.id', '=', 'event_transactions.learner_id')
+            ->where('yuwaah_sakhi.csc_id','!=','Sandbox_Testing');
+
+
+            $baseQuery->when($request->filled('status'), function ($q) use ($request) {
+                $q->where('event_transactions.review_status', $request->status);
+            });
+            
+            $baseQuery->when($request->event_type > 0, function ($q) use ($request) {
+                $q->where('yuwaah_event_type.id', $request->event_type);
+            });
+            
+            $baseQuery->when($request->event_category > 0, function ($q) use ($request) {
+                $q->where('event_transactions.event_category', $request->event_category);
+            });
+            
+            $baseQuery->when($request->filled('from_date') && $request->filled('to_date'), function ($q) use ($request) {
+                $q->whereBetween('event_transactions.created_at', [
+                    $request->from_date,
+                    $request->to_date
+                ]);
+            });
+            
+            $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
+                $q->where('learners.PROGRAM_CODE', 'like', "%{$request->program_code}%");
+            });
+
+
+            $baseQuery->when($request->filled('benificiery_name'), function ($q) use ($request) {
+                $q->where('event_transactions.benificiery_name', 'like', "%{$request->benificiery_name}%");
+            });
+
+            $baseQuery->when($request->filled('benificiery_mobile'), function ($q) use ($request) {
+                $q->where('event_transactions.beneficiary_phone_number', 'like', "%{$request->benificiery_mobile}%");
+            });
+
+
+            
+
+
+
+            $event_transactions = (clone $baseQuery)
             ->select(
                 'event_transactions.*',
                 'yuwaah_event_masters.event_type as event_master_name',
@@ -252,94 +306,175 @@ class ProfileController extends Controller
                 'yuwaah_sakhi.sakhi_id',
                 'yuwaah_event_type.name as event_name',
                 'learners.PROGRAM_STATE',
-                'learners.PROGRAM_DISTRICT'
+                'learners.PROGRAM_DISTRICT',
+                'learners.PROGRAM_CODE'
             )
-            ->orderBy('event_transactions.id', 'desc');
-    
-          
-           
-        /* Apply filters only if values exist */
-        if ($request->filled('submit')) {
+            ->orderBy('event_transactions.review_status')
+            ->orderBy('event_transactions.id', 'desc')
+            ->paginate(50);
 
-            $query->where(function ($q) use ($request) {
+
+
+            $statusCounts = (clone $baseQuery)
+            ->select(
+                'learners.PROGRAM_CODE',
+                DB::raw("COUNT(*) as total"),
+                DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Accepted' THEN 1 ELSE 0 END) as accepted_count"),
+                DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Rejected' THEN 1 ELSE 0 END) as rejected_count"),
+                DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Pending' THEN 1 ELSE 0 END) as pending_count"),
+                DB::raw("SUM(CASE WHEN event_transactions.review_status IS NULL OR event_transactions.review_status = 'Open' THEN 1 ELSE 0 END) as open_count")
+            )
+            ->groupBy('learners.PROGRAM_CODE')
+            ->orderBy('learners.PROGRAM_CODE')
+            ->get();
+
+            //dd($event_transactions);
         
-                // STATUS
-                if ($request->filled('status')) {
-                    if($request->status!=''){
-                        //dd($request->status);
-                        $q->Where('event_transactions.review_status', $request->status);
-                    }
-                }
+        //     $query = DB::connection('mysql2')
+        //         ->table('event_transactions')
+        //         ->leftJoin('yuwaah_event_masters', 'event_transactions.event_category', '=', 'yuwaah_event_masters.id')
+        //         ->leftJoin('yuwaah_event_type', 'yuwaah_event_masters.event_type_id', '=', 'yuwaah_event_type.id')
+        //         ->leftJoin('yuwaah_sakhi', 'event_transactions.ys_id', '=', 'yuwaah_sakhi.id')
+        //         ->join('learners', 'learners.id', '=', 'event_transactions.learner_id')
+        //         ->select(
+        //             'event_transactions.*',
+        //             'yuwaah_event_masters.event_type as event_master_name',
+        //             'yuwaah_event_masters.event_category as event_master_category',
+        //             'yuwaah_event_masters.description',
+        //             'yuwaah_event_masters.eligibility',
+        //             'yuwaah_event_masters.fee_per_completed_transaction',
+        //             'yuwaah_event_masters.date_event_created_in_master',
+        //             'yuwaah_event_masters.document_1',
+        //             'yuwaah_event_masters.document_2',
+        //             'yuwaah_event_masters.document_3',
+        //             'yuwaah_event_masters.status',
+        //             'yuwaah_sakhi.csc_id',
+        //             'yuwaah_sakhi.name as field_agent_name',
+        //             'yuwaah_sakhi.sakhi_id',
+        //             'yuwaah_event_type.name as event_name',
+        //             'learners.PROGRAM_STATE',
+        //             'learners.PROGRAM_DISTRICT',
+        //             'learners.PROGRAM_CODE'
+        //         )
+        //         ->where('yuwaah_sakhi.csc_id','!=','Sandbox_Testing')
+        //         ->orderBy('event_transactions.id', 'desc');
         
-                // EVENT TYPE
-                if ($request->event_type > 0) {
-                    //dd($request->event_type);
-                    $q->Where('yuwaah_event_type.id', $request->event_type);
-                }
+            
+        // $statusCounts = DB::connection('mysql2')
+        //     ->table('event_transactions')
+        //     ->join('learners', 'learners.id', '=', 'event_transactions.learner_id')
+        //     ->select(
+        //         'learners.PROGRAM_CODE',
+
+        //         DB::raw("COUNT(*) as total"),
+
+        //         DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Accepted' THEN 1 ELSE 0 END) as accepted_count"),
+
+        //         DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Rejected' THEN 1 ELSE 0 END) as rejected_count"),
+
+        //         DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Pending' THEN 1 ELSE 0 END) as pending_count"),
+
+        //         DB::raw("SUM(CASE WHEN event_transactions.review_status IS NULL OR event_transactions.review_status = '' THEN 1 ELSE 0 END) as open_count")
+        //     )
+        //     ->groupBy('learners.PROGRAM_CODE')
+        //     ->orderBy('learners.PROGRAM_CODE')
+        //     ->get();
+            
+        //     /* Apply filters only if values exist */
+        //     if ($request->filled('submit')) {
+
+        //         $query->where(function ($q) use ($request) {
+            
+        //             // STATUS
+        //             if ($request->filled('status')) {
+        //                 if($request->status!=''){
+        //                     //dd($request->status);
+        //                     $q->Where('event_transactions.review_status', $request->status);
+        //                 }
+        //             }
+            
+        //             // EVENT TYPE
+        //             if ($request->event_type > 0) {
+        //                 //dd($request->event_type);
+        //                 $q->Where('yuwaah_event_type.id', $request->event_type);
+        //             }
+            
+        //             // EVENT CATEGORY
+        //             if ($request->event_category > 0) {
+        //                 $q->orWhere('event_transactions.event_category', $request->event_category);
+        //             }
+            
+        //             // DATE RANGE
+        //             if ($request->from_date != '' && $request->to_date != '') {
+        //                 $q->orWhereBetween('event_transactions.created_at', [
+        //                     $request->from_date,
+        //                     $request->to_date
+        //                 ]);
+        //             }
+        //             if ($request->filled('benificiery_name')) {
+        //                 $q->Where('event_transactions.beneficiary_name', 'like', "%{$request->benificiery_name}%");
+        //             }
+            
+        //             if ($request->filled('benificiery_mobile')) {
+        //                 $q->Where('event_transactions.beneficiary_phone_number', 'like', "%{$request->benificiery_mobile}%");
+        //             }
+
+        //             if ($request->filled('sakhi_id')) {
+        //                 $q->Where('yuwaah_sakhi.sakhi_id', 'like', "%{$request->sakhi_id}%");
+        //             }
+            
+
+        //             if ($request->filled('program_code')) {
+        //                 $q->Where('learners.PROGRAM_CODE', 'like', "%{$request->program_code}%");
+        //             }
+            
+            
+        //             if ($request->filled('search_text')) {
+        //                 $search = $request->search_text;
+        //                 $q->orWhere(function ($qq) use ($search) {
+        //                     $qq->where('event_transactions.beneficiary_name', 'like', "%$search%")
+        //                     ->orWhere('event_transactions.beneficiary_phone_number', 'like', "%$search%")
+        //                     ->orWhere('event_transactions.event_value', 'like', "%$search%");
+        //                 });
+        //             }
+                    
+        //             // You can add more OR conditions here...
+        //         });
+        //     }
+        // /*
+        //     if ($request->filled('benificiery_name')) {
+        //         $query->where('event_transactions.beneficiary_name', 'like', "%{$request->benificiery_name}%");
+        //     }
         
-                // EVENT CATEGORY
-                if ($request->event_category > 0) {
-                    $q->orWhere('event_transactions.event_category', $request->event_category);
-                }
+        //     if ($request->filled('benificiery_mobile')) {
+        //         $query->where('event_transactions.beneficiary_phone_number', 'like', "%{$request->benificiery_mobile}%");
+        //     }
         
-                // DATE RANGE
-                if ($request->from_date != '' && $request->to_date != '') {
-                    $q->orWhereBetween('event_transactions.created_at', [
-                        $request->from_date,
-                        $request->to_date
-                    ]);
-                }
-                if ($request->filled('benificiery_name')) {
-                    $q->Where('event_transactions.beneficiary_name', 'like', "%{$request->benificiery_name}%");
-                }
+        //     if ($request->filled('search_text')) {
+        //         $search = $request->search_text;
+        //         $query->where(function ($q) use ($search) {
+        //             $q->where('event_transactions.beneficiary_name', 'like', "%$search%")
+        //             ->orWhere('event_transactions.beneficiary_phone_number', 'like', "%$search%")
+        //             ->orWhere('event_transactions.event_value', 'like', "%$search%");
+        //         });
+        //     }*/
+            
+            
         
-                if ($request->filled('benificiery_mobile')) {
-                    $q->Where('event_transactions.beneficiary_phone_number', 'like', "%{$request->benificiery_mobile}%");
-                }
+        //     $event_transactions = $query
+        //     ->orderBy('event_transactions.review_status')
+        //     ->orderBy('event_transactions.id', 'desc')
+        //     ->paginate(50);
+        //     //dd($event_transactions);
         
-                if ($request->filled('search_text')) {
-                    $search = $request->search_text;
-                    $q->orWhere(function ($qq) use ($search) {
-                        $qq->where('event_transactions.beneficiary_name', 'like', "%$search%")
-                           ->orWhere('event_transactions.beneficiary_phone_number', 'like', "%$search%")
-                           ->orWhere('event_transactions.event_value', 'like', "%$search%");
-                    });
-                }
-                
-                // You can add more OR conditions here...
-            });
-        }
-    /*
-        if ($request->filled('benificiery_name')) {
-            $query->where('event_transactions.beneficiary_name', 'like', "%{$request->benificiery_name}%");
-        }
-    
-        if ($request->filled('benificiery_mobile')) {
-            $query->where('event_transactions.beneficiary_phone_number', 'like', "%{$request->benificiery_mobile}%");
-        }
-    
-        if ($request->filled('search_text')) {
-            $search = $request->search_text;
-            $query->where(function ($q) use ($search) {
-                $q->where('event_transactions.beneficiary_name', 'like', "%$search%")
-                  ->orWhere('event_transactions.beneficiary_phone_number', 'like', "%$search%")
-                  ->orWhere('event_transactions.event_value', 'like', "%$search%");
-            });
-        }*/
-        
-        
-    
-        $event_transactions = $query
-        ->orderBy('event_transactions.review_status')
-        ->orderBy('event_transactions.id', 'desc')
-        ->paginate(50);
-        //dd($event_transactions);
-        
+        //dd($statusCounts);
         return view('profile.alleventtransaction', 
         compact(
-            'event_transactions', 
-            'eventTypeArray',
-            'eventCategoryArray'
+                'event_transactions', 
+                'eventTypeArray',
+                'eventCategoryArray',
+                'programCode',
+                'statusCounts'
         ));
     }
     
@@ -382,6 +517,7 @@ class ProfileController extends Controller
             'yuwaah_sakhi.name as field_agent_name',
             'learners.PROGRAM_STATE',
             'learners.PROGRAM_DISTRICT',
+            'learners.PROGRAM_CODE',
             
             'yuwaah_sakhi.contact_number as field_agent_contact'
         )
@@ -426,6 +562,7 @@ class ProfileController extends Controller
                 'agent_id' => $request->input('agent_id'),
                 'event_transaction_id' => $request->input('event_transaction_id'),
                 'user_id' => $request->input('user_id'),
+                'status' => $request->input('review_status'),
                 'comment_type' => $request->input('comment_type'),
                 'user_name' => $request->input('user_name')
                 

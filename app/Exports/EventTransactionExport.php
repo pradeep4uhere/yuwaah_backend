@@ -26,13 +26,29 @@ class EventTransactionExport implements FromCollection, WithHeadings
     public function collection()
     {
         $request = $this->request;
-    
+        //dd( $request);
         $query = DB::connection('mysql2')
             ->table('event_transactions')
+            ->leftJoin('learners', 'event_transactions.learner_id', '=', 'learners.id')
             ->leftJoin('yuwaah_event_masters', 'event_transactions.event_category', '=', 'yuwaah_event_masters.id')
             ->leftJoin('yuwaah_event_type', 'yuwaah_event_masters.event_type_id', '=', 'yuwaah_event_type.id')
+            ->leftJoin('yuwaah_sakhi', 'event_transactions.ys_id', '=', 'yuwaah_sakhi.id')
+            ->leftJoin(DB::raw('
+                (
+                    SELECT *
+                    FROM yuwaah_backend.event_transaction_comments c1
+                    WHERE c1.id = (
+                        SELECT MAX(c2.id)
+                        FROM yuwaah_backend.event_transaction_comments c2
+                        WHERE c2.event_transaction_id = c1.event_transaction_id
+                    )
+                ) as latest_comments
+            '), 'latest_comments.event_transaction_id', '=', 'event_transactions.id')
+    
             ->select(
-                'event_transactions.id',                              // ID
+                'event_transactions.id',   
+                'yuwaah_sakhi.sakhi_id',                           // ID
+                'learners.PROGRAM_CODE',
                 'event_transactions.review_status',                    // Event Status
                 'yuwaah_event_type.name as event_name',                 // Event Name
                 'yuwaah_event_masters.event_category',                  // Event Category
@@ -46,7 +62,14 @@ class EventTransactionExport implements FromCollection, WithHeadings
                 'yuwaah_event_masters.document_2 as document_2',
                 'yuwaah_event_masters.document_3 as document_3',
                 'event_transactions.comment',                           // Comment
-                'event_transactions.updated_at',                        // Last Updated
+                'event_transactions.updated_at',   
+                
+                'latest_comments.status as latest_status',
+                'latest_comments.comment as latest_comment',
+                'latest_comments.comment_type as latest_comment_type',
+
+                
+                                     // Last Updated
             )
             ->orderBy('event_transactions.id', 'desc');
     
@@ -86,6 +109,18 @@ class EventTransactionExport implements FromCollection, WithHeadings
                 $query->where('event_transactions.beneficiary_phone_number', 'like', "%{$request->benificiery_mobile}%");
             }
     
+
+            // BENEFICIARY MOBILE
+            if ($request->filled('program_code')) {
+                $query->where('learners.PROGRAM_CODE', 'like', "%{$request->program_code}%");
+            }
+
+            if ($request->filled('sakhi_id')) {
+                $query->where('yuwaah_sakhi.sakhi_id', 'like', "%{$request->sakhi_id}%");
+            }
+
+            
+    
             // GLOBAL SEARCH
             if ($request->filled('search_text')) {
                 $search = $request->search_text;
@@ -105,6 +140,8 @@ class EventTransactionExport implements FromCollection, WithHeadings
     {
         return [
             'ID',
+            'Agent ID',
+            'Program Code',
             'Event Status',
             'Event Name',
             'Event Category',
@@ -119,6 +156,9 @@ class EventTransactionExport implements FromCollection, WithHeadings
             'Required Document 3',
             'Comment',
             'Last Updated',
+            'Latest Status',
+            'Latest Comment',
+            'Latest Comment Type'
         ];
     }
 }

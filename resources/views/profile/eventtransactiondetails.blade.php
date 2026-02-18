@@ -91,20 +91,32 @@
                             <button type="submit" class="btn btn-sm btn-primary">Submit</button>
                         </td>
                         </tr>
+                    </table>
+                    <h2 class="text-lg font-medium text-gray-900">
+                        All comments&nbsp;
+                    </h2>
+                    <table class="table table-striped table-bordered" >
+                    <tbody>
                     @if($commentList)
                     <tr style="font-size:13px">
+                       <td nowrap="nowrap" align="left" width="1%"><strong>{{'SN'}}</strong></td>
+                       <td nowrap="nowrap" align="left" width="5%"><strong>Status</strong></td>
+                        <td nowrap="nowrap" align="left" width="5%"><strong>Comment Type</strong></td>
                         <td nowrap="nowrap" class="align-middle" colspan="3"><strong>Comment</strong></td>
-                        <td nowrap="nowrap" align="right" ><strong>Comment By</strong></td>
-                        <td nowrap="nowrap" align="right"><strong>&nbsp;</strong></td>
-                        <td nowrap="nowrap" align="right"><strong>Last Updated</strong></td>
+                        <td nowrap="nowrap" align="right" width="5%" ><strong>Comment By</strong></td>
+                        <td nowrap="nowrap" align="right" width="5%"><strong>Last Updated</strong></td>
                     </tr>
+                    <?php $count=1; ?>
                     @foreach($commentList as $item)
                         <tr style="font-size:13px; background-color: {{ $item['comment_type'] == 'agent' ? '#FFD6D6' : 'transparent' }}">
+                            <td nowrap="nowrap" align="left" width="1%"><strong>{{$count}}</strong></td>
+                            <td nowrap="nowrap">{{ $item['status'] }}</td>
+                            <td nowrap="nowrap">{{ $item['comment_type'] }}</td>
                             <td nowrap="nowrap"   colspan="3">{{ $item['comment'] }}</td>
                             <td nowrap="nowrap"  align="right">{{ $item['comment_type'] == 'agent' ? 'Agent- ' : '' }}{{ $item['user_name'] }}</td>
-                            <td nowrap="nowrap" align="right">&nbsp;</td>
                             <td nowrap="nowrap" align="right">{{ $item['created_at'] }}</td>
                         </tr>
+                    <?php $count++;?>
                     @endforeach
                     @endif
                 </tbody>
