@@ -71,7 +71,7 @@ class EventTransactionExport implements FromCollection, WithHeadings
                 'latest_comments.comment_type as latest_comment_type',
             )
             ->orderBy('event_transactions.id', 'desc');
-    
+        //$query->where('event_transactions.review_status', $request->status);
         /** APPLY FILTERS (CORRECT WAY) */
         if ($request->filled('submit')) {
     
@@ -125,8 +125,8 @@ class EventTransactionExport implements FromCollection, WithHeadings
                 $search = $request->search_text;
                 $query->where(function ($q) use ($search) {
                     $q->where('event_transactions.beneficiary_name', 'like', "%$search%")
-                      ->orWhere('event_transactions.beneficiary_phone_number', 'like', "%$search%")
-                      ->orWhere('event_transactions.event_value', 'like', "%$search%");
+                      ->where('event_transactions.beneficiary_phone_number', 'like', "%$search%")
+                      ->where('event_transactions.event_value', 'like', "%$search%");
                 });
             }
         }
