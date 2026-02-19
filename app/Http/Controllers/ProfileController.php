@@ -275,8 +275,8 @@ class ProfileController extends Controller
             });
 
 
-            $baseQuery->when($request->filled('benificiery_name'), function ($q) use ($request) {
-                $q->where('event_transactions.benificiery_name', 'like', "%{$request->benificiery_name}%");
+            $baseQuery->when($request->filled('beneficiary_name'), function ($q) use ($request) {
+                $q->where('event_transactions.beneficiary_name', 'like', "%{$request->beneficiary_name}%");
             });
 
             $baseQuery->when($request->filled('id'), function ($q) use ($request) {
@@ -295,6 +295,7 @@ class ProfileController extends Controller
             $event_transactions = (clone $baseQuery)
             ->select(
                 'event_transactions.*',
+                'event_transactions.beneficiary_name as beneficiary_name',
                 'yuwaah_event_masters.event_type as event_master_name',
                 'yuwaah_event_masters.event_category as event_master_category',
                 'yuwaah_event_masters.description',
