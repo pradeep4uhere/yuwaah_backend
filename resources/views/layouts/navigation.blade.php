@@ -15,8 +15,11 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                     <x-nav-link :href="route('profile.allevent')" :active="request()->routeIs('allevents')">
+                    <x-nav-link :href="route('profile.allevent')" :active="request()->routeIs('allevents')">
                         {{ __('Events') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('profile.alllearnerevent')" :active="request()->routeIs('allevents')">
+                        {{ __('Learners Events') }}
                     </x-nav-link>
                     <x-nav-link :href="route('profile.alllearner')" :active="request()->routeIs('allevents')">
                         {{ __('Learner') }}

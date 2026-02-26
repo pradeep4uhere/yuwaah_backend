@@ -24,6 +24,10 @@ Route::middleware('auth')->group(function () {
     Route::any('/editevent/{id}', [ProfileController::class, 'eventEdit'])->name('event.edit');
     Route::any('/savecomment', [ProfileController::class, 'saveEventTransactionComment'])->name('event.savecomment');
 
+
+    Route::any('/alleventbylearner', [ProfileController::class, 'allEventTranscationByLearner'])->name('profile.alllearnerevent');
+    
+
     //
     Route::any('/getlearner', [ProfileController::class, 'getLearnerFromYuthHub'])->name('yuthhub.getlearner');
     Route::any('/alllearner', [ProfileController::class, 'allLearner'])->name('profile.alllearner');

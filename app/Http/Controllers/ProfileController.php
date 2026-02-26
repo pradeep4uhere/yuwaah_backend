@@ -773,4 +773,140 @@ public function exportEventTransactions(Request $request)
 
 
 
+
+
+public function allEventTranscationByLearner(Request $request)
+{
+    $programCode = DB::connection('mysql2')
+        ->table('partners')
+        ->where('status', 1)
+        ->get();
+
+    $eventTypeArray = DB::connection('mysql2')
+        ->table('yuwaah_event_type')
+        ->where('status', 1)
+        ->get();
+
+    $eventCategoryArray = [];
+    if ($request->event_type > 0) {
+        $eventCategoryArray = DB::connection('mysql2')
+            ->table('yuwaah_event_masters')
+            ->where('event_type_id', $request->event_type)
+            ->get();
+    }
+
+    // ==============================
+    // MAIN BASE QUERY
+    // ==============================
+
+    $baseQuery = DB::connection('mysql2')
+        ->table('event_transactions')
+        ->leftJoin('yuwaah_event_masters', 'event_transactions.event_category', '=', 'yuwaah_event_masters.id')
+        ->leftJoin('yuwaah_event_type', 'yuwaah_event_masters.event_type_id', '=', 'yuwaah_event_type.id')
+        ->leftJoin('yuwaah_sakhi', 'event_transactions.ys_id', '=', 'yuwaah_sakhi.id')
+        ->join('learners', 'learners.id', '=', 'event_transactions.learner_id')
+        ->where('yuwaah_sakhi.csc_id', '!=', 'Sandbox_Testing');
+
+    // ==============================
+    // FILTERS
+    // ==============================
+    $baseQuery->when($request->filled('status'), fn($q) =>
+        $q->where('event_transactions.review_status', $request->status)
+    );
+
+    $baseQuery->when($request->event_type > 0, fn($q) =>
+        $q->where('yuwaah_event_type.id', $request->event_type)
+    );
+
+    $baseQuery->when($request->event_category > 0, fn($q) =>
+        $q->where('event_transactions.event_category', $request->event_category)
+    );
+
+    $baseQuery->when($request->filled('from_date') && $request->filled('to_date'), fn($q) =>
+        $q->whereBetween('event_transactions.created_at', [
+            $request->from_date,
+            $request->to_date
+        ])
+    );
+
+    $baseQuery->when($request->filled('program_code'), fn($q) =>
+        $q->where('learners.PROGRAM_CODE', 'like', "%{$request->program_code}%")
+    );
+
+    $baseQuery->when($request->filled('beneficiary_name'), fn($q) =>
+        $q->where('event_transactions.beneficiary_name', 'like', "%{$request->beneficiary_name}%")
+    );
+
+    $baseQuery->when($request->filled('id'), fn($q) =>
+        $q->where('event_transactions.id', $request->id)
+    );
+
+    $baseQuery->when($request->filled('benificiery_mobile'), fn($q) =>
+        $q->where('event_transactions.beneficiary_phone_number', 'like', "%{$request->benificiery_mobile}%")
+    );
+
+    $baseQuery->when($request->filled('sakhi_id'), fn($q) =>
+        $q->where('yuwaah_sakhi.sakhi_id', 'like', "%{$request->sakhi_id}%")
+    );
+
+
+    
+    // ==============================
+    // SINGLE PAGINATED QUERY
+    // ==============================
+
+    $events = $baseQuery
+        ->select(
+            'event_transactions.*',
+            'event_transactions.beneficiary_name as beneficiary_name',
+            'yuwaah_event_masters.event_type as event_master_name',
+            'yuwaah_event_masters.event_category as event_master_category',
+            'yuwaah_event_masters.description',
+            'yuwaah_event_masters.eligibility',
+            'yuwaah_event_masters.fee_per_completed_transaction',
+            'yuwaah_event_masters.date_event_created_in_master',
+            'yuwaah_event_masters.document_1',
+            'yuwaah_event_masters.document_2',
+            'yuwaah_event_masters.document_3',
+            'yuwaah_event_masters.status',
+            'yuwaah_sakhi.csc_id',
+            'yuwaah_sakhi.name as name',
+            'yuwaah_sakhi.sakhi_id',
+            'yuwaah_event_type.name as event_name',
+            'learners.first_name as learner_first_name',
+            'learners.last_name as learner_last_name',
+            'learners.PROGRAM_STATE',
+            'learners.PROGRAM_DISTRICT',
+            'learners.PROGRAM_CODE',
+            'event_transactions.id as event_transactions_id'
+        )
+        ->orderBy('learners.id')
+        ->orderBy('event_transactions.updated_at', 'desc')
+        ->paginate(50);
+
+    // ==============================
+    // GROUP AFTER PAGINATION
+    // ==============================
+
+    $groupedLearners = $events->getCollection()
+    ->groupBy('learner_id')
+    ->map(function ($items) {
+        return (object)[
+            'id' => $items->first()->learner_id,
+            'first_name' => $items->first()->learner_first_name,
+            'last_name' => $items->first()->learner_last_name,
+            'events' => $items
+        ];
+    });
+
+    //dd($groupedLearners);
+    return view('profile.alleventtransactionlearner', [
+        'learners' => $groupedLearners,
+        'pagination' => $events,
+        'eventTypeArray' => $eventTypeArray,
+        'eventCategoryArray' => $eventCategoryArray,
+        'programCode' => $programCode
+    ]);
+}
+
 }
