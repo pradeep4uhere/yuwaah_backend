@@ -274,9 +274,10 @@ class ProfileController extends Controller
                 $q->where('learners.PROGRAM_CODE', 'like', "%{$request->program_code}%");
             });
 
-
-            $baseQuery->when($request->filled('beneficiary_name'), function ($q) use ($request) {
-                $q->where('event_transactions.beneficiary_name', 'like', "%{$request->beneficiary_name}%");
+            
+            $baseQuery->when($request->filled('benificiery_name'), function ($q) use ($request) {
+               
+                $q->where('event_transactions.beneficiary_name', 'like', "%{$request->benificiery_name}%");
             });
 
             $baseQuery->when($request->filled('id'), function ($q) use ($request) {
@@ -318,7 +319,7 @@ class ProfileController extends Controller
             ->orderBy('event_transactions.id', 'desc')
             ->paginate(50);
 
-
+           // dd($event_transactions);
             $statusCounts = [];
             // $statusCounts = (clone $baseQuery)
             // ->select(
@@ -492,11 +493,9 @@ class ProfileController extends Controller
     public function eventEdit(Request $request,$id){
         if ($request->isMethod('post')) {
             $newValue = $request->get('fee_per_completed_transaction');
-        
             DB::connection('mysql2')->table('event_transactions')
                 ->where('id', $id) // Replace with your condition
                 ->update(['event_value' => $newValue]);
-        
             return redirect()->back()->with('success_value', 'Fee per completed transaction updated successfully.');
         }
         $event_transactions = DB::connection('mysql2')
