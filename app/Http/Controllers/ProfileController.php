@@ -247,26 +247,10 @@ class ProfileController extends Controller
             ->leftJoin('yuwaah_event_masters', 'event_transactions.event_category', '=', 'yuwaah_event_masters.id')
             ->leftJoin('yuwaah_event_type', 'yuwaah_event_masters.event_type_id', '=', 'yuwaah_event_type.id')
             ->leftJoin('yuwaah_sakhi', 'event_transactions.ys_id', '=', 'yuwaah_sakhi.id')
-            ->join('learners', 'learners.id', '=', 'event_transactions.learner_id')
+            ->leftjoin('learners', 'learners.id', '=', 'event_transactions.learner_id')
             ->where('yuwaah_sakhi.csc_id','!=','Sandbox_Testing');
 
-            //dd($request->all());
-            /**
-             *  
-                "status" => null
-                "event_type" => null
-                "event_category" => null
-                "from_date" => null
-                "to_date" => null
-                "benificiery_name" => null
-                "benificiery_mobile" => null
-                "submitted_date" => null
-                "sakhi_id" => null
-                "program_code" => null
-                "id" => null
-                "submit" => "Search"
-                ]
-             */
+           
             $baseQuery->when($request->filled('status'), function ($q) use ($request) {
                 $q->where('event_transactions.review_status', $request->status);
             });
@@ -279,12 +263,13 @@ class ProfileController extends Controller
                 $q->where('event_transactions.event_category', $request->event_category);
             });
             
-            $baseQuery->when($request->filled('from_date') && $request->filled('to_date'), function ($q) use ($request) {
-                $q->whereBetween('event_transactions.created_at', [
-                    $request->from_date,
-                    $request->to_date
-                ]);
-            });
+            $baseQuery->when(
+                $request->filled('from_date') && $request->filled('to_date'),
+                function ($q) use ($request) {
+                    $q->where('event_transactions.event_date_submitted', '>=', $request->from_date)
+                      ->where('event_transactions.event_date_submitted', '<=', $request->to_date);
+                }
+            );
             
             $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
                 $q->where('learners.PROGRAM_CODE', $request->program_code);
@@ -309,7 +294,7 @@ class ProfileController extends Controller
                 $q->where('event_transactions.event_date_submitted', $request->submitted_date);
             });
 
-
+            //dd( $baseQuery);
             $event_transactions = (clone $baseQuery)
             ->select(
                 'event_transactions.*',
@@ -491,6 +476,9 @@ class ProfileController extends Controller
         //     //dd($event_transactions);
         
         //dd($statusCounts);
+
+        // Print bindings
+        //dd($baseQuery->toSql());
         return view('profile.alleventtransaction', 
         compact(
                 'event_transactions', 
