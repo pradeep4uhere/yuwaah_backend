@@ -37,8 +37,8 @@
                         <th scope="col">Status</th>
                         <th scope="col">Event Type</th>
                         <th scope="col">Event Category</th>
-                        <th scope="col">Submitted Date From</th>
-                        <th scope="col">Submitted Date To</th>
+                        <th scope="col">Created Date From</th>
+                        <th scope="col">Created Date To</th>
                         <th scope="col">Beneficiary Name</th>
                         <th scope="col" nowrap="nowrap">Beneficiary Number</th>
                         <th scope="col">&nbsp;</th>

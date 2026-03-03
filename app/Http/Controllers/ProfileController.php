@@ -250,7 +250,23 @@ class ProfileController extends Controller
             ->join('learners', 'learners.id', '=', 'event_transactions.learner_id')
             ->where('yuwaah_sakhi.csc_id','!=','Sandbox_Testing');
 
-
+            //dd($request->all());
+            /**
+             *  
+                "status" => null
+                "event_type" => null
+                "event_category" => null
+                "from_date" => null
+                "to_date" => null
+                "benificiery_name" => null
+                "benificiery_mobile" => null
+                "submitted_date" => null
+                "sakhi_id" => null
+                "program_code" => null
+                "id" => null
+                "submit" => "Search"
+                ]
+             */
             $baseQuery->when($request->filled('status'), function ($q) use ($request) {
                 $q->where('event_transactions.review_status', $request->status);
             });
@@ -271,7 +287,7 @@ class ProfileController extends Controller
             });
             
             $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
-                $q->where('learners.PROGRAM_CODE', 'like', "%{$request->program_code}%");
+                $q->where('learners.PROGRAM_CODE', $request->program_code);
             });
 
             
@@ -289,8 +305,9 @@ class ProfileController extends Controller
             });
 
 
-            
-
+            $baseQuery->when($request->filled('submitted_date'), function ($q) use ($request) {
+                $q->where('event_transactions.event_date_submitted', $request->submitted_date);
+            });
 
 
             $event_transactions = (clone $baseQuery)
