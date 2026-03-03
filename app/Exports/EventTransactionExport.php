@@ -92,14 +92,20 @@ class EventTransactionExport implements FromCollection, WithHeadings
     
             // DATE RANGE
             if ($request->from_date && $request->to_date) {
-                $query->whereBetween('event_transactions.created_at', [
+                $query->whereBetween('event_transactions.event_date_submitted', [
                     $request->from_date,
                     $request->to_date
                 ]);
             }
+            
     
             // BENEFICIARY NAME
-            if ($request->filled('benificiery_name')) {
+            if ($request->filled('submitted_date')) {
+                $query->where('event_transactions.event_date_submitted', $request->submitted_date);
+            }
+
+             // BENEFICIARY NAME
+             if ($request->filled('benificiery_name')) {
                 $query->where('event_transactions.beneficiary_name', 'like', "%{$request->benificiery_name}%");
             }
     
@@ -111,7 +117,7 @@ class EventTransactionExport implements FromCollection, WithHeadings
 
             // BENEFICIARY MOBILE
             if ($request->filled('program_code')) {
-                $query->where('learners.PROGRAM_CODE', 'like', "%{$request->program_code}%");
+                $query->where('learners.PROGRAM_CODE', $request->program_code);
             }
 
             if ($request->filled('sakhi_id')) {
