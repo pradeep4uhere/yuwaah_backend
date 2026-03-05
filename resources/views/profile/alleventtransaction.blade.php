@@ -284,7 +284,8 @@
 
                     @empty
                         <tr>
-                            <td colspan="20" class="text-center text-muted">
+                            <td colspan="20" class="text-center text-muted" style="background-color:#f3000040;    color: #46464d !important;
+    font-weight: 800 !important;">
                                 No Records Found
                             </td>
                         </tr>

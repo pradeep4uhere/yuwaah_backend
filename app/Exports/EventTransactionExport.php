@@ -70,6 +70,10 @@ class EventTransactionExport implements FromCollection, WithHeadings
                 'latest_comments.comment as latest_comment',
                 'latest_comments.comment_type as latest_comment_type',
             )
+            ->where('yuwaah_sakhi.csc_id','!=','Sandbox_Testing')
+            ->whereNotNull('event_transactions.review_status')
+            ->whereNotNull('event_transactions.event_date_submitted')
+            ->whereNotNull('event_transactions.learner_id')
             ->orderBy('event_transactions.id', 'desc');
         //$query->where('event_transactions.review_status', $request->status);
         /** APPLY FILTERS (CORRECT WAY) */

@@ -289,7 +289,8 @@ class ProfileController extends Controller
             });
 
             $baseQuery->when($request->filled('benificiery_mobile'), function ($q) use ($request) {
-                $q->where('event_transactions.beneficiary_phone_number', 'like', "%{$request->benificiery_mobile}%");
+                //dd($request->benificiery_mobile);
+                $q->where('event_transactions.beneficiary_phone_number', $request->benificiery_mobile);
             });
 
 
@@ -324,7 +325,8 @@ class ProfileController extends Controller
             ->orderBy('event_transactions.id', 'desc')
             ->paginate(50);
 
-           // dd($event_transactions);
+            //dd($baseQuery->toSql());
+            //dd($event_transactions);
             $statusCounts = [];
             // $statusCounts = (clone $baseQuery)
             // ->select(
