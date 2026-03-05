@@ -248,7 +248,8 @@ class ProfileController extends Controller
             ->leftJoin('yuwaah_event_type', 'yuwaah_event_masters.event_type_id', '=', 'yuwaah_event_type.id')
             ->leftJoin('yuwaah_sakhi', 'event_transactions.ys_id', '=', 'yuwaah_sakhi.id')
             ->leftjoin('learners', 'learners.id', '=', 'event_transactions.learner_id')
-            ->where('yuwaah_sakhi.csc_id','!=','Sandbox_Testing');
+            ->where('yuwaah_sakhi.csc_id','!=','Sandbox_Testing')
+            ->where('event_transactions.review_status','!=',null);
 
            
             $baseQuery->when($request->filled('status'), function ($q) use ($request) {
