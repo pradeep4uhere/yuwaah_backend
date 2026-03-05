@@ -82,7 +82,7 @@
                        
                         </tr>
                         <tr>
-                        <th scope="col">Event Submitted Date</th>
+                       
                         <th scope="col">Agent ID</th>
                         <th scope="col">Program Code</th>
                         <th scope="col">Event Number</th>
@@ -91,9 +91,10 @@
                         <th scope="col" nowrap="nowrap">&nbsp;</th>
                         <th scope="col">&nbsp;</th>
                         <th scope="col">&nbsp;</th>
+                        <th scope="col">&nbsp;</th>
                         </tr>
                         <tr>
-                        <td scope="col" nowrap="nowrap"><input type="date" class="form-control" name="submitted_date" value="{{ request('submitted_date') }}"/></td>
+                        <!-- <td scope="col" nowrap="nowrap"><input type="date" class="form-control" name="submitted_date" value="{{ request('submitted_date') }}"/></td> -->
                         <td scope="col"><input  class="form-control" type="text" name="sakhi_id"  value="{{ request('sakhi_id') }}"/></td>
                         <td scope="col">
                             <select name="program_code" class="form-control">
@@ -110,7 +111,8 @@
                         <td>&nbsp;</td>
                         <td scope="col" nowrap="nowrap"><input type="submit" name="submit" class="btn  btn-primary" value="Search"/>
                          &nbsp;<a href="{{ url()->current() }}" class="btn btn-danger">Clear Filter</a></td>
-                        <td scope="col">
+                         <td>&nbsp;</td>
+                         <td scope="col">
                             <a href="{{ route('export-event-transactions',request()->query()) }}" class="btn " style="display:flex;align-items:center;">
                                 <img src="{{ asset('download.png') }}" height="25" width="25" style="margin-right:8px;" />
                                 Export Event Transaction
