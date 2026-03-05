@@ -249,8 +249,8 @@ class ProfileController extends Controller
             ->leftJoin('yuwaah_sakhi', 'event_transactions.ys_id', '=', 'yuwaah_sakhi.id')
             ->leftjoin('learners', 'learners.id', '=', 'event_transactions.learner_id')
             ->where('yuwaah_sakhi.csc_id','!=','Sandbox_Testing')
-            ->where('event_transactions.review_status','!=',null)
-            ->where('event_transactions.learner_id','!=',null);
+            ->whereNotNull('event_transactions.review_status')
+            ->whereNotNull('event_transactions.learner_id');
 
            
             $baseQuery->when($request->filled('status'), function ($q) use ($request) {
