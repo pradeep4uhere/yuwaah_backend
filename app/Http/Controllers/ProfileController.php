@@ -250,6 +250,7 @@ class ProfileController extends Controller
             ->leftjoin('learners', 'learners.id', '=', 'event_transactions.learner_id')
             ->where('yuwaah_sakhi.csc_id','!=','Sandbox_Testing')
             ->whereNotNull('event_transactions.review_status')
+            ->whereNotNull('event_transactions.event_date_submitted')
             ->whereNotNull('event_transactions.learner_id');
 
            
