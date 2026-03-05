@@ -105,10 +105,8 @@ class ProfileController extends Controller
 
 
 
-    public function allLearnerFromBigQueryList(Request $request){
-        //$userlist = $this->listAllBigQueryTables();
-      
 
+    public function allLearnerFromBigQueryList(Request $request){
         $offset = $request->query('offset', 0);
         $limit = $request->query('limit', 1000);
         $userlist = $this->queryBigQuery($offset, $limit);
@@ -151,6 +149,106 @@ class ProfileController extends Controller
         $total = $this->queryBigQueryCount();
         return response()->json(['total' => $total]);
     }
+
+
+
+
+
+    
+    /**
+     *  Get All the Learnres With Course Name
+     */
+    public function allLearnerwithCourseNameFromBigQueryList(Request $request){
+        //$userlist = $this->listAllBigQueryTables();
+        $offset = $request->query('offset', 0);
+        $limit = $request->query('limit', 1000);
+        $userlist = $this->queryBigQuerywithCourseName($offset, $limit);
+        return response()->json($userlist);
+    }
+
+
+
+    /** 
+     * All Data From Query
+     */
+    function queryBigQuerywithCourseName($offset, $limit)
+    {
+        $projectId = 'siif-408307';
+
+        $keyFilePath = storage_path('app/bigquery.json');
+        putenv('GOOGLE_APPLICATION_CREDENTIALS=' . $keyFilePath);
+
+
+        // Create a BigQuery client
+        $bigQuery = new BigQueryClient([
+            'projectId' => $projectId,
+            'keyFile' => json_decode(file_get_contents($keyFilePath), true),
+        ]);
+
+        $offset = (int) $offset;
+        $limit = (int) $limit;
+
+        $query = "SELECT * FROM `siif-408307.datamodel.Learners_With_Course` LIMIT $limit OFFSET $offset";
+       
+
+
+        try {
+            // Run the query
+            $queryJob = $bigQuery->query($query);
+            $queryResults = $bigQuery->runQuery($queryJob);
+            //dd($queryResults);
+
+            // Fetch the results
+            // Fetch the rows and return as an array
+            $rows = [];
+            foreach ($queryResults as $row) {
+                // Convert objects to arrays and remove any double quotes
+                $rows[] = str_replace('"', "",$row);
+            }
+
+
+            return $rows;
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+
+    public function countCourseNameLearners()
+    {
+        $total = $this->queryBigQuerywithCourseNameCount();
+        return response()->json(['total' => $total]);
+    }
+
+
+    function queryBigQuerywithCourseNameCount()
+    {
+        $projectId = 'siif-408307';
+        $keyFilePath = storage_path('app/bigquery.json');
+        putenv('GOOGLE_APPLICATION_CREDENTIALS=' . $keyFilePath);
+
+        $bigQuery = new BigQueryClient([
+            'projectId' => $projectId,
+            'keyFile' => json_decode(file_get_contents($keyFilePath), true),
+        ]);
+
+        $query = "SELECT COUNT(*) as total FROM `siif-408307.datamodel.Learners_With_Course`";
+
+        try {
+            $queryJob = $bigQuery->query($query);
+            $queryResults = $bigQuery->runQuery($queryJob);
+
+            foreach ($queryResults as $row) {
+                return (int) $row['total'];
+            }
+    
+            // Fallback if no row found
+            return 0;
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
 
 
     

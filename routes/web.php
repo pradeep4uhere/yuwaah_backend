@@ -48,8 +48,15 @@ Route::get('/google/callback', [GoogleDriveController::class, 'handleGoogleCallb
 Route::get('/google/upload', [GoogleDriveController::class, 'upload']);
 
 
+//Get All Learneres With Course Name and Course Completed
+Route::any('/bigquery-coursename', [ProfileController::class, 'allLearnerwithCourseNameFromBigQueryList'])->name('bigquery.coursename.learner');
+Route::get('/bigquery-coursename-count', [ProfileController::class, 'countCourseNameLearners']);
+
+
+
 
 Route::any('/bigquery', [ProfileController::class, 'allLearnerFromBigQueryList'])->name('bigquery.learner');
+
 Route::get('/bigquery-count', [ProfileController::class, 'countLearners']);
 Route::get('/upload-google-drive', [GoogleDriveController::class, 'upload'])
     ->name('upload.google.drive');

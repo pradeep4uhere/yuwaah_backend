@@ -151,6 +151,11 @@ class Learner extends Model
         return $this->belongsTo(Block::class);
     }
     
+
+    public function courses()
+    {
+        return $this->hasMany(LearnerCourse::class, 'phone_number', 'normalized_mobile');
+    }
     
 
 }
