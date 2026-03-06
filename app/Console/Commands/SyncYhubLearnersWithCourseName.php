@@ -64,7 +64,7 @@ class SyncYhubLearnersWithCourseName extends Command
                     [
                         'phone_number'      => $phone,
                         'course_name'       => $data['CourseName'] ?? null,
-                        'completed_course'  => (strtolower($data['Completed_1_Course']) == 'yes') ? 1 : 0,
+                        'completed_course'  => $data['Completed_1_Course'],
                         'load_date'         => isset($data['Load_Date']) ? date('Y-m-d', strtotime($data['Load_Date'])) : null,
                     ]
                 );
