@@ -359,6 +359,14 @@ class ProfileController extends Controller
             $baseQuery->when($request->event_type > 0, function ($q) use ($request) {
                 $q->where('yuwaah_event_type.id', $request->event_type);
             });
+
+
+          
+            
+            $baseQuery->when($request->sakhi_id > 0, function ($q) use ($request) {
+                $q->where('yuwaah_sakhi.sakhi_id', $request->sakhi_id);
+            });
+            
             
             $baseQuery->when($request->event_category > 0, function ($q) use ($request) {
                 $q->where('event_transactions.event_category', $request->event_category);
