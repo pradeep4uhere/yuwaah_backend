@@ -56,7 +56,8 @@ class Learner extends Model
         'RELOCATE_FOR_JOB',
         'WHEN_CAN_USER_START',
         'USER_NEED_HELP_WITH',
-        'create_date'
+        'create_date',
+        'yuth_hub_dob'
     ];
 
     protected $casts = [
