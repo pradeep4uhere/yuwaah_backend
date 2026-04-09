@@ -24,7 +24,7 @@ class FetchYuthHubLearners extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Fetch Learner From Yuthhub API';
 
     /**
      * Execute the console command.
@@ -156,6 +156,7 @@ class FetchYuthHubLearners extends Command
                             'secondary_phone_number' => $profile['secondary_phone_number'] ?? null,
                             'current_job_title' => $profile['current_job_title'] ?? null,
                             'date_of_birth' => $dob,
+                           
                             'yuth_hub_dob'=> $profile['date_of_birth'],
                             'current_location_zip' => $profile['current_location_zip'] ?? null,
                             'profile_photo_url' => $profile['profile_photo_url'] ?? null,
@@ -197,7 +198,7 @@ class FetchYuthHubLearners extends Command
                         ]
                     );
                     $learner->wasRecentlyCreated ? $totalInserted++ : $totalUpdated++;
-
+                    \Log::info('DOB Value', ['yuth_hub_dob' => $profile['date_of_birth'] ?? null]);
                     
                     //echo "Student Updated - ".$dob.' - '.$profile['date_of_birth'].' - '.$profile['first_name'].' - '.$profile['user_phone_number']."\n";
                     /*fputcsv($csvFile, [
