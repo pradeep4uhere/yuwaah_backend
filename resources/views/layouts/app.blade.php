@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-@php
-    date_default_timezone_set('Asia/Kolkata');
-@endphp
+
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
     <head>
@@ -22,6 +20,9 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     </head>
     <body class="font-sans antialiased">
+    @php
+        date_default_timezone_set('Asia/Kolkata');
+    @endphp
         <div class="min-h-screen bg-gray-100">
             @include('layouts.navigation')
 
