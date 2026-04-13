@@ -270,7 +270,7 @@
                             </td>
 
                             <td>{{ $item->comment }}</td>
-                            <td>{{ $item->created_at->timezone('Asia/Kolkata')->format('d M Y h:i A') }}</td>
+                            <td>{{ \Carbon\Carbon::parse($item->created_at)->timezone('Asia/Kolkata')->format('d M Y h:i A') }}</td>
 
                             <!-- Action -->
                             <td>
