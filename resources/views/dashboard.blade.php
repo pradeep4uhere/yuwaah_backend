@@ -4,14 +4,26 @@
             {{ __('Dashboard') }}
         </h2>
     </x-slot>
-
+    
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    {{ __("You're logged in!") }}
-                </div>
+    <div class="flex justify-center">
+        <div class="premium-welcome-card text-center">
+
+            <!-- Welcome Text -->
+            <h2 class="premium-welcome-title">
+                Welcome Back 👋
+            </h2>
+
+            <p class="premium-welcome-subtitle">
+                Manage your learners, events and system from one place.
+            </p>
+
+            <!-- Image -->
+            <div class="mt-4">
+                <img src="{{ asset('hello.svg') }}" class="premium-welcome-img" />
             </div>
+
         </div>
     </div>
+</div>
 </x-app-layout>

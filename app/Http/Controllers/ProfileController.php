@@ -434,18 +434,18 @@ class ProfileController extends Controller
             //dd($baseQuery->toSql());
             //dd($event_transactions);
             $statusCounts = [];
-            // $statusCounts = (clone $baseQuery)
-            // ->select(
-            //     'learners.PROGRAM_CODE',
-            //     DB::raw("COUNT(*) as total"),
-            //     DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Accepted' THEN 1 ELSE 0 END) as accepted_count"),
-            //     DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Rejected' THEN 1 ELSE 0 END) as rejected_count"),
-            //     DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Pending' THEN 1 ELSE 0 END) as pending_count"),
-            //     DB::raw("SUM(CASE WHEN event_transactions.review_status IS NULL OR event_transactions.review_status = 'Open' THEN 1 ELSE 0 END) as open_count")
-            // )
-            // ->groupBy('learners.PROGRAM_CODE')
-            // ->orderBy('learners.PROGRAM_CODE')
-            // ->get();
+            $statusCounts = (clone $baseQuery)
+            ->select(
+                'learners.PROGRAM_CODE',
+                DB::raw("COUNT(*) as total"),
+                DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Accepted' THEN 1 ELSE 0 END) as accepted_count"),
+                DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Rejected' THEN 1 ELSE 0 END) as rejected_count"),
+                DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Pending' THEN 1 ELSE 0 END) as pending_count"),
+                DB::raw("SUM(CASE WHEN event_transactions.review_status IS NULL OR event_transactions.review_status = 'Open' THEN 1 ELSE 0 END) as open_count")
+            )
+            ->groupBy('learners.PROGRAM_CODE')
+            ->orderBy('learners.PROGRAM_CODE')
+            ->get();
 
             //dd($event_transactions);
         
@@ -849,7 +849,7 @@ public function getLearnerFromYuthHub(){
 
 public function allLearner(Request $request){
    
-    $learner = Learner::paginate(1000);
+    $learner = Learner::orderBy('id','desc')->paginate(25);
     return view('profile.alllearner', [
         'user' => $learner,
     ]);

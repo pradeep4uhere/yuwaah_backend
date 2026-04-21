@@ -1,300 +1,638 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('All Event Transaction') }}&nbsp;[{{$event_transactions->total()}}]
-        </h2>
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div>
+                <h2 class="premium-page-title mb-1">
+                    {{ __('All Event Transaction') }}
+                </h2>
+                <p class="premium-page-subtitle mb-0">
+                    Review, filter, export and manage all submitted event transactions.
+                </p>
+            </div>
+
+            <div class="premium-count-badge">
+                Total Transactions: {{ $event_transactions->total() }}
+            </div>
+        </div>
     </x-slot>
-   <style>
-    .form-control {
-        width: 100%;
-        padding: 8px 12px;
-        font-size: 14px;
-        border: 1px solid #ced4da;
-        border-radius: 6px;
-        transition: all 0.2s ease-in-out;
-        box-shadow: none;
-    }
 
-    .form-control:focus {
-        border-color: #0d6efd;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-    }
+    <style>
+        .premium-page-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
+
+        .premium-page-subtitle {
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+
+        .premium-count-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 18px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #ffffff, #eef2ff);
+            color: #312e81;
+            font-size: 14px;
+            font-weight: 700;
+            border: 1px solid rgba(99, 102, 241, 0.12);
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.08);
+        }
+
+        .premium-card {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            border-radius: 26px;
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .premium-card-header {
+            padding: 24px 28px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.10);
+            background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(248,250,252,0.85));
+        }
+
+        .premium-card-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .premium-card-subtitle {
+            font-size: 0.92rem;
+            color: #64748b;
+            margin-bottom: 0;
+        }
+
+        .premium-card-body {
+            padding: 24px 28px;
+        }
+
+        .premium-form-control {
+            width: 100%;
+            min-height: 46px;
+            padding: 10px 14px;
+            font-size: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            border-radius: 14px;
+            background: #fff;
+            transition: all 0.22s ease-in-out;
+            box-shadow: none;
+        }
+
+        .premium-form-control:focus {
+            border-color: rgba(79, 70, 229, 0.35);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.10);
+        }
+
+        .premium-filter-table {
+            width: 100%;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .premium-filter-table th,
+        .premium-filter-table td {
+            padding: 10px 8px;
+            vertical-align: middle;
+            color: #334155;
+            border: 0 !important;
+        }
+
+        .premium-filter-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        .premium-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 10px 16px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            border: none;
+            transition: all 0.22s ease;
+            white-space: nowrap;
+        }
+
+        .premium-btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: #fff;
+            box-shadow: 0 12px 24px rgba(79, 70, 229, 0.18);
+        }
+
+        .premium-btn-primary:hover {
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .premium-btn-danger {
+            background: rgba(239, 68, 68, 0.10);
+            color: #b91c1c;
+            border: 1px solid rgba(239, 68, 68, 0.12);
+        }
+
+        .premium-btn-danger:hover {
+            color: #991b1b;
+            background: rgba(239, 68, 68, 0.16);
+        }
+
+        .premium-btn-export {
+            background: linear-gradient(135deg, #fff, #f8fafc);
+            color: #0f172a;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+        }
+
+        .premium-btn-export:hover {
+            color: #111827;
+            transform: translateY(-1px);
+        }
+
+        .premium-table {
+            width: 100%;
+            margin: 0;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .premium-table thead th {
+            background: linear-gradient(135deg, #f8fafc, #eef2ff);
+            color: #334155;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            padding: 16px 14px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+            white-space: nowrap;
+        }
+
+        .premium-table tbody td,
+        .premium-table tbody th {
+            padding: 16px 14px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.10);
+            background: rgba(255,255,255,0.86);
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        .premium-table tbody tr:nth-child(even) td,
+        .premium-table tbody tr:nth-child(even) th {
+            background: rgba(248,250,252,0.76);
+        }
+
+        .premium-table tbody tr:hover td,
+        .premium-table tbody tr:hover th {
+            background: rgba(238,242,255,0.72);
+            transition: all .2s ease;
+        }
+
+        .premium-summary-table tbody td {
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .premium-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .premium-status.open {
+            background: rgba(100, 116, 139, 0.12);
+            color: #334155;
+        }
+
+        .premium-status.pending {
+            background: rgba(245, 158, 11, 0.14);
+            color: #b45309;
+        }
+
+        .premium-status.rejected {
+            background: rgba(239, 68, 68, 0.12);
+            color: #b91c1c;
+        }
+
+        .premium-status.accepted {
+            background: rgba(16, 185, 129, 0.12);
+            color: #047857;
+        }
+
+        .premium-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .premium-badge.success {
+            background: rgba(16, 185, 129, 0.12);
+            color: #047857;
+        }
+
+        .premium-badge.danger {
+            background: rgba(239, 68, 68, 0.10);
+            color: #b91c1c;
+        }
+
+        .premium-id-link {
+            font-weight: 800;
+            color: #4338ca;
+            text-decoration: none;
+        }
+
+        .premium-id-link:hover {
+            color: #312e81;
+        }
+
+        .premium-doc-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            background: rgba(59,130,246,0.10);
+            color: #1d4ed8;
+            margin-bottom: 6px;
+        }
+
+        .premium-doc-link:hover {
+            color: #1e40af;
+            background: rgba(59,130,246,0.16);
+        }
+
+        .premium-view-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9px 14px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            color: #fff;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.18);
+        }
+
+        .premium-view-btn:hover {
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .premium-empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #64748b;
+            font-weight: 700;
+            background: rgba(248,250,252,0.8) !important;
+        }
+
+        .premium-muted {
+            color: #64748b;
+        }
+
+        @media (max-width: 768px) {
+            .premium-card-header,
+            .premium-card-body {
+                padding: 18px;
+            }
+
+            .premium-page-title {
+                font-size: 1.35rem;
+            }
+        }
     </style>
+
+    {{-- Filter Section --}}
     <div class="py-4">
-        <div class="max-w-12xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-12xl">
-                <h2 class="font-bold text-xl text-gray-900">
-                        {{ __('Event Transaction filter') }}&nbsp;
-                    </h2>
-                 <div style="overflow-x: auto; margin-top:12px;">
-                
-                    <form action="" method="get">
-                    @csrf
-                    <table class="table" style=" width: 100%; font-size: 15px; white-space: nowrap;">
-                        <tr>
-                        <th scope="col">Status</th>
-                        <th scope="col">Event Type</th>
-                        <th scope="col">Event Category</th>
-                        <th scope="col">Submitted Date From</th>
-                        <th scope="col">Submitted Date To</th>
-                        <th scope="col">Beneficiary Name</th>
-                        <th scope="col" nowrap="nowrap">Beneficiary Number</th>
-                        <th scope="col">&nbsp;</th>
-                        <th scope="col">&nbsp;</th>
-                        </tr>
-                      
-                    <tr>
-                        <th scope="col">
-                        <select class="form-control" name="status" style=" width: 100px; font-size: 15px; white-space: nowrap;">
-                            <option value="">All</option>
-                            <option value="Open" {{ request('status') == 'Open' ? 'selected' : '' }}>Open</option>
-                            <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Return</option>
-                            <option value="Rejected" {{ request('status') == 'Rejected' ? 'selected' : '' }}>Rejected</option>
-                            <option value="Accepted" {{ request('status') == 'Accepted' ? 'selected' : '' }}>Accepted</option>
-                        </select>
-                        </th>
-                        <th scope="col">
-                        <select class="form-control" name="event_type" id="event_type" style=" width: 150px; font-size: 15px; white-space: nowrap;">
-                            <option value="">All</option>
-                            @foreach($eventTypeArray as $item)
-                                <option value="{{ $item->id }}" {{ request('event_type') == $item->id ? 'selected' : '' }}>
-                                    {{ $item->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        </th>
-                        <th scope="col">
-                        <select class="form-control" name="event_category" id="event_category" style="min-width:285px">
-                            <option value="">All</option>
-                            @foreach($eventCategoryArray ?? [] as $cat)
-                                <option value="{{ $cat->id }}" {{ request('event_category') == $cat->id ? 'selected' : '' }}>
-                                    {{ $cat->event_category }}
-                                </option>
-                            @endforeach
-                        </select>
-                        </th>
-                        <th scope="col"><input type="date"  name="from_date" class="form-control" value="{{ request('from_date') }}" /></th>
-                        <th scope="col"><input type="date" class="form-control" name="to_date" class="form-control" value="{{ request('to_date') }}" /></th>
-                        <th scope="col"><input type="text" class="form-control" name="benificiery_name" class="form-control" value="{{ request('benificiery_name') }}"/></th>
-                        <th scope="col" nowrap="nowrap"><input type="text" class="form-control" name="benificiery_mobile" value="{{ request('benificiery_mobile') }}" /></th>
-                       
-                        </tr>
-                        <tr>
-                       
-                        <th scope="col">Agent ID</th>
-                        <th scope="col">Program Code</th>
-                        <th scope="col">Event Number</th>
-                        <th scope="col">&nbsp;</th>
-                        <th scope="col">&nbsp;</th>
-                        <th scope="col" nowrap="nowrap">&nbsp;</th>
-                        <th scope="col">&nbsp;</th>
-                        <th scope="col">&nbsp;</th>
-                        <th scope="col">&nbsp;</th>
-                        </tr>
-                        <tr>
-                        <!-- <td scope="col" nowrap="nowrap"><input type="date" class="form-control" name="submitted_date" value="{{ request('submitted_date') }}"/></td> -->
-                        <td scope="col"><input  class="form-control" type="text" name="sakhi_id"  value="{{ request('sakhi_id') }}"/></td>
-                        <td scope="col">
-                            <select name="program_code" class="form-control">
-                                <option value="">All Program Code</option>
-                                @foreach($programCode as $item)
-                                <option value="{{ $item->name }}"
-                                    @selected(request('program_code') == $item->name)>
-                                    {{ $item->name }}
-                                </option>
-                                @endforeach
-                            </select>
-                        </td>
-                        <td scope="col"><input  class="form-control" type="text" name="id"  value="{{ request('id') }}"/></td>
-                        <td>&nbsp;</td>
-                        <td scope="col" nowrap="nowrap"><input type="submit" name="submit" class="btn  btn-primary" value="Search"/>
-                         &nbsp;<a href="{{ url()->current() }}" class="btn btn-danger">Clear Filter</a></td>
-                         <td>&nbsp;</td>
-                         <td scope="col">
-                            <a href="{{ route('export-event-transactions',request()->query()) }}" class="btn " style="display:flex;align-items:center;">
-                                <img src="{{ asset('download.png') }}" height="25" width="25" style="margin-right:8px;" />
-                                Export Event Transaction
-                            </a>
-                        </td>  
-
-                    </tr>
-                    </table>
-                    </form>
-                   
+        <div class="max-w-12xl ">
+            <div class="premium-card">
+                <div class="premium-card-header">
+                    <h3 class="premium-card-title">Event Transaction Filter</h3>
+                    <p class="premium-card-subtitle">Use filters below to narrow down the records and export matching results.</p>
                 </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="py-2">
-        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-12xl">
-                <table class="table table-striped table-bordered" >
-                    <thead class="thead-dark">
-                        <tr>
-                        <th scope="col" style="text-align: center;">Program Code</th>
-                        <th scope="col" style="text-align: center;">Total Event</th>
-                        <th scope="col"style="text-align: center;">Total Open </th>
-                        <th scope="col" style="text-align: center;">Total Return </th>
-                        <th scope="col" style="text-align: center;">Total Rejected </th>
-                        <th scope="col" style="text-align: center;">Total Accepted </th>
-                    </thead>
-                    <tbody>
-                    @foreach($statusCounts as $item)
-                    <tr style="font-size:13px">
-                       <td  align="center" width="1%"><strong>{{$item->PROGRAM_CODE}}</strong></td>
-                       <td  align="center" width="1%"><strong>{{$item->total}}</strong></td>
-                       <td  align="center" width="1%"><strong>{{$item->open_count}}</strong></td>
-                       <td  align="center" width="1%"><strong>{{$item->pending_count}}</strong></td>
-                       <td  align="center" width="1%"><strong>{{$item->rejected_count}}</strong></td>
-                       <td  align="center" width="1%"><strong>{{$item->accepted_count}}</strong></td>
-                    </tr>
-                    @endforeach
-                    </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="py-2">
-        <div class="max-w-12xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-12xl">
-                 <div style="overflow-x: auto;">
-                    <table class="table" style="width: 100%; font-size: 14px; white-space: nowrap;">
-                    <thead class="thead-dark">
-                        <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Event Status</th>
-                        <th scope="col">Program Code</th>
-                        <th scope="col">Event Name</th>
-                        <th scope="col">Event Category</th>
-                        <th scope="col">Field Agent</th>
-                        <th scope="col">Field Agent ID</th>
-                        <th scope="col">Required Docs</th>
-                        <th scope="col">Number</th>
-                        <th scope="col">Beneficiary Name</th>
-                        <th scope="col">Beneficiary State</th>
-                        <th scope="col">Beneficiary District</th>
-                        <th scope="col" nowrap="nowrap">Event Created</th>
-                        <th scope="col" nowrap="nowrap">Event Submitted</th>
-                        <th scope="col" nowrap="nowrap">Event Value</th>
-                        <th scope="col">Document</th>
-                        <th scope="col">Comment</th>
-                        <th scope="col">Last Updated</th>
-                        <th scope="col">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @forelse($event_transactions as $item)
-                        @php
-                            // Status Badge Color
-                            $status = $item->review_status;
-                            $statusClass = match($status) {
-                                'Accepted' => 'text-success fw-bold',
-                                'Rejected' => 'text-danger fw-bold',
-                                'Pending'  => 'text-warning fw-bold',
-                                default    => 'text-dark fw-bold'
-                            };
+                <div class="premium-card-body">
+                    <div style="overflow-x:auto;">
+                        <form action="" method="get">
+                            @csrf
 
-                            // Submitted Color
-                            $submittedClass = $item->event_date_submitted ? 'text-success fw-bold' : 'text-danger fw-bold';
+                            <table class="premium-filter-table">
+                                <tr>
+                                    <th class="premium-filter-label">Status</th>
+                                    <th class="premium-filter-label">Event Type</th>
+                                    <th class="premium-filter-label">Event Category</th>
+                                    <th class="premium-filter-label">Submitted Date From</th>
+                                    <th class="premium-filter-label">Submitted Date To</th>
+                                    <th class="premium-filter-label">Beneficiary Name</th>
+                                    <th class="premium-filter-label">Beneficiary Number</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
 
-                            // Decode Documents
-                            $documents = [];
-                            if (!empty($item->uploaded_doc_links)) {
-                                $decoded = json_decode($item->uploaded_doc_links, true);
-                                $documents = is_array($decoded) ? $decoded : [$item->uploaded_doc_links];
-                            }
+                                <tr>
+                                    <td>
+                                        <select class="premium-form-control" name="status">
+                                            <option value="">All</option>
+                                            <option value="Open" {{ request('status') == 'Open' ? 'selected' : '' }}>Open</option>
+                                            <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Return</option>
+                                            <option value="Rejected" {{ request('status') == 'Rejected' ? 'selected' : '' }}>Rejected</option>
+                                            <option value="Accepted" {{ request('status') == 'Accepted' ? 'selected' : '' }}>Accepted</option>
+                                        </select>
+                                    </td>
 
-                            $remoteBaseUrl = env('FRONT_END_URL');
-                        @endphp
+                                    <td>
+                                        <select class="premium-form-control" name="event_type" id="event_type">
+                                            <option value="">All</option>
+                                            @foreach($eventTypeArray as $item)
+                                                <option value="{{ $item->id }}" {{ request('event_type') == $item->id ? 'selected' : '' }}>
+                                                    {{ $item->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </td>
 
-                        <tr class="align-middle small">
+                                    <td>
+                                        <select class="premium-form-control" name="event_category" id="event_category" style="min-width:280px">
+                                            <option value="">All</option>
+                                            @foreach($eventCategoryArray ?? [] as $cat)
+                                                <option value="{{ $cat->id }}" {{ request('event_category') == $cat->id ? 'selected' : '' }}>
+                                                    {{ $cat->event_category }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </td>
 
-                            <!-- ID -->
-                            <th scope="row">
-                                <a href="{{ route('event.edit',['id'=>$item->id]) }}">
-                                    {{ $item->id }}
-                                </a>
-                            </th>
+                                    <td><input type="date" name="from_date" class="premium-form-control" value="{{ request('from_date') }}" /></td>
+                                    <td><input type="date" name="to_date" class="premium-form-control" value="{{ request('to_date') }}" /></td>
+                                    <td><input type="text" class="premium-form-control" name="benificiery_name" value="{{ request('benificiery_name') }}" /></td>
+                                    <td><input type="text" class="premium-form-control" name="benificiery_mobile" value="{{ request('benificiery_mobile') }}" /></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
 
-                            <!-- Status -->
-                            <td class="{{ $statusClass }}">
-                                {{ $status == 'Pending' ? 'Return' : $status }}
-                            </td>
+                                <tr>
+                                    <th class="premium-filter-label">Agent ID</th>
+                                    <th class="premium-filter-label">Program Code</th>
+                                    <th class="premium-filter-label">Event Number</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
 
-                            <td>{{ $item->PROGRAM_CODE }}</td>
-                            <td>{{ $item->event_name }}</td>
-                            <td>{{ $item->event_master_category }}</td>
-                            <td>{{ $item->field_agent_name }}</td>
-                            <td>{{ $item->sakhi_id }}</td>
+                                <tr>
+                                    <td>
+                                        <input class="premium-form-control" type="text" name="sakhi_id" value="{{ request('sakhi_id') }}" />
+                                    </td>
 
-                            <!-- Required Documents -->
-                            <td>
-                                {{ $item->document_1 }}<br>
-                                {{ $item->document_2 }}<br>
-                                {{ $item->document_3 }}
-                            </td>
+                                    <td>
+                                        <select name="program_code" class="premium-form-control">
+                                            <option value="">All Program Code</option>
+                                            @foreach($programCode as $item)
+                                                <option value="{{ $item->name }}" @selected(request('program_code') == $item->name)>
+                                                    {{ $item->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </td>
 
-                            <td>{{ $item->beneficiary_phone_number }}</td>
-                            <td>{{ $item->beneficiary_name }}</td>
-                            <td>{{ $item->PROGRAM_STATE }}</td>
-                            <td>{{ $item->PROGRAM_DISTRICT }}</td>
-                            <td>{{ $item->updated_at }}</td>
+                                    <td>
+                                        <input class="premium-form-control" type="text" name="id" value="{{ request('id') }}" />
+                                    </td>
 
-                            <!-- Submitted Date -->
-                            <td class="{{ $submittedClass }}">
-                                {{ $item->event_date_submitted ?: 'NA' }}
-                            </td>
+                                    <td></td>
+                                    <td></td>
 
-                            <td>₹ {{ number_format($item->event_value, 2) }}</td>
+                                    <td nowrap="nowrap">
+                                        <input type="submit" name="submit" class="premium-btn premium-btn-primary" value="Search"/>
+                                        <a href="{{ url()->current() }}" class="premium-btn premium-btn-danger">Clear Filter</a>
+                                    </td>
 
-                            <!-- Uploaded Documents -->
-                            <td>
-                                @if(count($documents))
-                                    @foreach($documents as $doc)
-                                        <a href="{{ $remoteBaseUrl . 'storage/' . $doc }}"
-                                        target="_blank"
-                                        class="d-block text-primary">
-                                            📎 View
+                                    <td>
+                                        <a href="{{ route('export-event-transactions',request()->query()) }}" class="premium-btn premium-btn-export">
+                                            <img src="{{ asset('download.png') }}" height="22" width="22" />
+                                            Export Event Transaction
                                         </a>
-                                    @endforeach
-                                @else
-                                    <span class="text-muted">No Documents</span>
-                                @endif
-                            </td>
+                                    </td>
 
-                            <td>{{ $item->comment }}</td>
-                            <td>{{ \Carbon\Carbon::parse($item->created_at)->timezone('Asia/Kolkata')->format('d M Y h:i A') }}</td>
-
-                            <!-- Action -->
-                            <td>
-                                <a href="{{ route('event.edit',['id'=>$item->id]) }}"
-                                class="btn btn-sm btn-primary">
-                                View Event
-                                </a>
-                            </td>
-
-                        </tr>
-
-                    @empty
-                        <tr>
-                            <td colspan="20" class="text-center text-muted" style="background-color:#f3000040;    color: #46464d !important;
-    font-weight: 800 !important;">
-                                No Records Found
-                            </td>
-                        </tr>
-                    @endforelse
-                    </tbody>
-
-                    </table>
-                    {{ $event_transactions->appends(request()->query())->links() }}
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </table>
+                        </form>
+                    </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Summary Table --}}
+    <div class="py-2">
+        <div class="max-w-6xl ">
+            <div class="premium-card">
+                <div class="premium-card-header">
+                    <h3 class="premium-card-title">Program Wise Summary</h3>
+                    <p class="premium-card-subtitle">Quick overview of event counts by program code and review status.</p>
+                </div>
+
+                <div class="premium-card-body" style="overflow-x:auto;">
+                    <table class="table premium-table premium-summary-table mb-0">
+                        <thead>
+                            <tr>
+                                <th style="text-align:center;">Program Code</th>
+                                <th style="text-align:center;">Total Event</th>
+                                <th style="text-align:center;">Total Open</th>
+                                <th style="text-align:center;">Total Return</th>
+                                <th style="text-align:center;">Total Rejected</th>
+                                <th style="text-align:center;">Total Accepted</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($statusCounts as $item)
+                                <tr style="font-size:13px">
+                                    <td align="center"><strong>{{ $item->PROGRAM_CODE }}</strong></td>
+                                    <td align="center"><strong>{{ $item->total }}</strong></td>
+                                    <td align="center"><strong>{{ $item->open_count }}</strong></td>
+                                    <td align="center"><strong>{{ $item->pending_count }}</strong></td>
+                                    <td align="center"><strong>{{ $item->rejected_count }}</strong></td>
+                                    <td align="center"><strong>{{ $item->accepted_count }}</strong></td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Main Listing --}}
+    <div class="py-2">
+        <div class="max-w-12xl">
+            <div class="premium-card">
+                <div class="premium-card-header">
+                    <h3 class="premium-card-title">Event Transactions Listing</h3>
+                    <p class="premium-card-subtitle">Complete listing of all event transactions with documents, comments and status.</p>
+                </div>
+
+                <div class="premium-card-body">
+                    <div style="overflow-x:auto;">
+                        <table class="table premium-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Event Status</th>
+                                    <th>Program Code</th>
+                                    <th>Event Name</th>
+                                    <th nowrap="nowrap">Event Category</th>
+                                    <th>Field Agent</th>
+                                    <th>Field Agent ID</th>
+                                    <th>Required Docs</th>
+                                    <th>Number</th>
+                                    <th>Beneficiary Name</th>
+                                    <th>Beneficiary State</th>
+                                    <th>Beneficiary District</th>
+                                    <th>Event Created</th>
+                                    <th>Event Submitted</th>
+                                    <th>Event Value</th>
+                                    <th>Document</th>
+                                    <th>Comment</th>
+                                    <th>Last Updated</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @forelse($event_transactions as $item)
+                                    @php
+                                        $status = $item->review_status;
+
+                                        $statusClass = match($status) {
+                                            'Accepted' => 'accepted',
+                                            'Rejected' => 'rejected',
+                                            'Pending'  => 'pending',
+                                            default    => 'open'
+                                        };
+
+                                        $documents = [];
+                                        if (!empty($item->uploaded_doc_links)) {
+                                            $decoded = json_decode($item->uploaded_doc_links, true);
+                                            $documents = is_array($decoded) ? $decoded : [$item->uploaded_doc_links];
+                                        }
+
+                                        $remoteBaseUrl = env('FRONT_END_URL');
+                                    @endphp
+
+                                    <tr class="align-middle">
+                                        <th scope="row">
+                                            <a href="{{ route('event.edit',['id'=>$item->id]) }}" class="premium-id-link">
+                                                {{ $item->id }}
+                                            </a>
+                                        </th>
+
+                                        <td>
+                                            <span class="premium-status {{ $statusClass }}">
+                                                {{ $status == 'Pending' ? 'Return' : $status }}
+                                            </span>
+                                        </td>
+
+                                        <td>{{ $item->PROGRAM_CODE }}</td>
+                                        <td>{{ $item->event_name }}</td>
+                                        <td nowrap="nowrap">{{ $item->event_master_category }}</td>
+                                        <td nowrap="nowrap">{{ $item->field_agent_name }}</td>
+                                        <td nowrap="nowrap">{{ $item->sakhi_id }}</td>
+
+                                        <td >
+                                            {{ $item->document_1 }}<br>
+                                            {{ $item->document_2 }}<br>
+                                            {{ $item->document_3 }}
+                                        </td>
+
+                                        <td>{{ $item->beneficiary_phone_number }}</td>
+                                        <td>{{ $item->beneficiary_name }}</td>
+                                        <td>{{ $item->PROGRAM_STATE }}</td>
+                                        <td>{{ $item->PROGRAM_DISTRICT }}</td>
+                                        <td>{{ $item->updated_at }}</td>
+
+                                        <td>
+                                            @if($item->event_date_submitted)
+                                                <span class="premium-badge success">{{ $item->event_date_submitted }}</span>
+                                            @else
+                                                <span class="premium-badge danger">NA</span>
+                                            @endif
+                                        </td>
+
+                                        <td>₹ {{ number_format($item->event_value, 2) }}</td>
+
+                                        <td>
+                                            @if(count($documents))
+                                                @foreach($documents as $doc)
+                                                    <a href="{{ $remoteBaseUrl . 'storage/' . $doc }}"
+                                                       target="_blank"
+                                                       class="premium-doc-link">
+                                                        📎 View
+                                                    </a>
+                                                @endforeach
+                                            @else
+                                                <span class="premium-muted">No Documents</span>
+                                            @endif
+                                        </td>
+
+                                        <td>{{ $item->comment }}</td>
+
+                                        <td>
+                                            {{ \Carbon\Carbon::parse($item->created_at)->timezone('Asia/Kolkata')->format('d M Y h:i A') }}
+                                        </td>
+
+                                        <td>
+                                            <a href="{{ route('event.edit',['id'=>$item->id]) }}" class="premium-view-btn">
+                                                View Event
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="20" class="premium-empty-state">
+                                            No Records Found
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+
+                        <div class="mt-4">
+                            {{ $event_transactions->appends(request()->query())->links() }}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
