@@ -91,6 +91,7 @@ class FetchYuthHubLearners extends Command
                 $this->info("Fetching page: $page");
                 $lastCreatedAt = Learner::max('create_date');
                 //$lastCreatedAt = '2025-08-01 12:14:35';
+                \Log::info('Max Date', ['date' => $lastCreatedAt ?? null]);
                 
                 $ma = $lastCreatedAt
                 ? Carbon::parse($lastCreatedAt)->addSecond()->timestamp
@@ -100,6 +101,7 @@ class FetchYuthHubLearners extends Command
                     'ps' => $perPage,
                     'ma' => $ma // 🔥 incremental filter
                 ]);
+                \Log::info('Max Date time', ['date_time' => $ma ?? null]);
 
                 if (!$userResponse->ok()) {
                     $this->error("API fetch failed on page $page");
