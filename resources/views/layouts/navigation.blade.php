@@ -41,7 +41,7 @@ height: auto;
                     </a>
                     <a href="{{ route('profile.yuthhubapilist') }}"
                        class="premium-nav-link {{ request()->routeIs('allusers') ? 'active' : '' }}">
-                        Yuthhub API
+                        Yuthhub APIs
                     </a>
 
                     <a href="{{ route('profile.allusers') }}"
