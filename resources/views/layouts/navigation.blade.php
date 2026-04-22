@@ -39,6 +39,10 @@ height: auto;
                        class="premium-nav-link {{ request()->routeIs('profile.alllearner') ? 'active' : '' }}">
                         Learner
                     </a>
+                    <a href="{{ route('profile.yuthhubapilist') }}"
+                       class="premium-nav-link {{ request()->routeIs('allusers') ? 'active' : '' }}">
+                        Yuthhub API
+                    </a>
 
                     <a href="{{ route('profile.allusers') }}"
                        class="premium-nav-link {{ request()->routeIs('allusers') ? 'active' : '' }}">

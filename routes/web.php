@@ -35,6 +35,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/export-event-transactions', [ProfileController::class, 'exportEventTransactions'])->name('export-event-transactions');
     Route::get('/get-categories', [ProfileController::class, 'getCategories'])
     ->name('get.categories');
+    Route::get('/yuthhubapilist', [ProfileController::class, 'yuthHubApiList'])->name('profile.yuthhubapilist');
+   
+    
+    
 
 
     

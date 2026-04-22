@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\User;
 use App\Models\Learner;
+use App\Models\ApiFetchLog;
+
 use Illuminate\Support\Facades\DB;
 use App\Models\EventTransactionComment;
 use Log;
@@ -1023,5 +1025,32 @@ public function allEventTranscationByLearner(Request $request)
         'programCode' => $programCode
     ]);
 }
+
+
+
+
+/**
+ * Yuthhub API List
+ */
+public function yuthHubApiList(Request $request){
+    $data = ApiFetchLog::orderBy('id','desc')->paginate(25);
+    return view('profile.apifetchlist', [
+        'user' => $data,
+    ]);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
