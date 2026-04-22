@@ -90,7 +90,7 @@ class FetchYuthHubLearners extends Command
             do {
                 $this->info("Fetching page: $page");
                 $lastCreatedAt = Learner::max('create_date');
-                $lastCreatedAt = '2026-04-01 12:14:35';
+                //$lastCreatedAt = '2026-04-01 12:14:35';
                 \Log::info('Max Date', ['date' => $lastCreatedAt ?? null]);
                 
                 $ma = $lastCreatedAt
@@ -202,7 +202,7 @@ class FetchYuthHubLearners extends Command
                         ]
                     );
                     $learner->wasRecentlyCreated ? $totalInserted++ : $totalUpdated++;
-                    \Log::info('user Profile', ['Profile' => $profile ?? null]);
+                    \Log::info('user Profile Update Using APi', ['Profile' => date('Y-m-d H:i:s a')?? null]);
                     
                     //echo "Student Updated - ".$dob.' - '.$profile['date_of_birth'].' - '.$profile['first_name'].' - '.$profile['user_phone_number']."\n";
                     /*fputcsv($csvFile, [
