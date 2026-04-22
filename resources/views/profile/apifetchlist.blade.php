@@ -38,6 +38,7 @@
                                 <th>#</th>
                                 <th>Page Number</th>
                                 <th>Records Fetched</th>
+                                <th>Total Records</th>
                                 <th>Records Remaining</th>
                                 <th>Fetched At</th>
                             </tr>
@@ -74,7 +75,7 @@
                                     </td>
 
                                     <td nowrap="nowrap">
-                                        <span class="premium-text-muted">{{ $item['  fetched_at'] }}</span>
+                                        <span class="premium-text-muted">{{ $item['fetched_at'] }}</span>
                                     </td>
 
                                   
