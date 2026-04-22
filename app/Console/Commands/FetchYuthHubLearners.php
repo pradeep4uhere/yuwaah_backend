@@ -200,7 +200,7 @@ class FetchYuthHubLearners extends Command
                         ]
                     );
                     $learner->wasRecentlyCreated ? $totalInserted++ : $totalUpdated++;
-                    \Log::info('DOB Value', ['yuth_hub_dob' => $profile['date_of_birth'] ?? null]);
+                    \Log::info('user Profile', ['Profile' => $profile ?? null]);
                     
                     //echo "Student Updated - ".$dob.' - '.$profile['date_of_birth'].' - '.$profile['first_name'].' - '.$profile['user_phone_number']."\n";
                     /*fputcsv($csvFile, [
