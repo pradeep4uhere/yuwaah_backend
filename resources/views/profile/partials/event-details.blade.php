@@ -211,7 +211,7 @@
             }
         }
 
-        $remoteBaseUrl = env('FRONT_END_URL');
+        $remoteBaseUrl = 'https://youthhubpartner.org/';
 
         $status = $event_transactions->review_status ?: 'Open';
 
