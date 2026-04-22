@@ -549,7 +549,7 @@
                                             $documents = is_array($decoded) ? $decoded : [$item->uploaded_doc_links];
                                         }
 
-                                        $remoteBaseUrl = env('FRONT_END_URL');
+                                        $remoteBaseUrl = 'https://youthhubpartner.org/';
                                     @endphp
 
                                     <tr class="align-middle">
