@@ -880,6 +880,8 @@ public function getCategories(Request $request)
 
 public function exportEventTransactions(Request $request)
 {
+    ini_set('memory_limit', '1024M');
+    set_time_limit(0);
     Log::info('Export started', $request->all());
     try {
     return Excel::download(
