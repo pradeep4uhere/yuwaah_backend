@@ -880,10 +880,21 @@ public function getCategories(Request $request)
 
 public function exportEventTransactions(Request $request)
 {
+    Log::info('Export started', $request->all());
+    try {
     return Excel::download(
         new EventTransactionExport($request),
         'event_transactions.xlsx'
-    );
+    ); 
+    } catch (\Throwable $e) {
+            Log::error('Export failed', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            dd($e->getMessage(), $e->getFile(), $e->getLine());
+        }
   
 }
 
