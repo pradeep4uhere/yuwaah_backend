@@ -90,7 +90,7 @@ class FetchYuthHubLearners extends Command
             do {
                 $this->info("Fetching page: $page");
                 $lastCreatedAt = Learner::max('create_date');
-                //$lastCreatedAt = '2026-04-01 12:14:35';
+                $lastCreatedAt = '2025-10-01 12:14:35';
                 \Log::info('Max Date', ['date' => $lastCreatedAt ?? null]);
                 
                 $ma = $lastCreatedAt
@@ -199,6 +199,10 @@ class FetchYuthHubLearners extends Command
                             'english_knowledge'=> $profile['engilsh_proficiency_level'],
                             'digital_proficiency'=> $profile['digital_proficiency_level'],
                             'create_date'=>$profile['create_date'],
+                            'no_of_applied_jobs'=>$profile['no_of_applied_jobs'],
+                            'no_of_applied_courses'=>$profile['no_of_applied_courses'],
+                            'partner_wise_course_counts'=>$profile['partner_wise_course_counts'],
+                            'partner_wise_job_counts'=>$profile['partner_wise_job_counts']
                         ]
                     );
                     $learner->wasRecentlyCreated ? $totalInserted++ : $totalUpdated++;
