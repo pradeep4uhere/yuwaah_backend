@@ -90,7 +90,7 @@ class FetchYuthHubLearners extends Command
             do {
                 $this->info("Fetching page: $page");
                 $lastCreatedAt = Learner::max('create_date');
-                //$lastCreatedAt = '2025-10-01 12:14:35';
+                $lastCreatedAt = '2025-10-01 12:14:35';
                 \Log::info('Max Date', ['date' => $lastCreatedAt ?? null]);
                 
                 $ma = $lastCreatedAt

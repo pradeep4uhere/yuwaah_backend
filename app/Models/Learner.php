@@ -57,7 +57,11 @@ class Learner extends Model
         'WHEN_CAN_USER_START',
         'USER_NEED_HELP_WITH',
         'create_date',
-        'yuth_hub_dob'
+        'yuth_hub_dob',
+        'no_of_applied_jobs',
+        'no_of_applied_courses',
+        'partner_wise_course_counts',
+        'partner_wise_job_counts'
     ];
 
     protected $casts = [
