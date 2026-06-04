@@ -201,8 +201,8 @@ class FetchYuthHubLearners extends Command
                             'create_date'=>$profile['create_date'],
                             'no_of_applied_jobs'=>$profile['no_of_applied_jobs'],
                             'no_of_applied_courses'=>$profile['no_of_applied_courses'],
-                            'partner_wise_course_counts'=>$profile['partner_wise_course_counts'],
-                            'partner_wise_job_counts'=>$profile['partner_wise_job_counts']
+                            'partner_wise_course_counts' => json_encode($profile['partner_wise_course_counts'] ?? []),
+                            'partner_wise_job_counts' => json_encode($profile['partner_wise_job_counts'] ?? []),
                         ]
                     );
                     $learner->wasRecentlyCreated ? $totalInserted++ : $totalUpdated++;
