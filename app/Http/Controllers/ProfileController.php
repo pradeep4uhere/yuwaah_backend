@@ -383,10 +383,14 @@ class ProfileController extends Controller
             );
             
             //dd($request->program_code);
-            if ($request->program_code === 'Times Foundation') {
-                $baseQuery->where('learners.PROGRAM_CODE', 'LIKE', '%Times%');
-            } else {
-                $baseQuery->where('learners.PROGRAM_CODE', $request->program_code);
+            if($request->program_code =='Times Foundation'){
+                $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
+                    $q->where('learners.PROGRAM_CODE', 'LIKE', '%Times%');
+                });
+            }else{
+                $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
+                    $q->where('learners.PROGRAM_CODE', $request->program_code);
+                });
             }
 
             
