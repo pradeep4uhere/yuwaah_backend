@@ -450,6 +450,7 @@ class ProfileController extends Controller
                 DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Accepted' THEN 1 ELSE 0 END) as accepted_count"),
                 DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Rejected' THEN 1 ELSE 0 END) as rejected_count"),
                 DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Pending' THEN 1 ELSE 0 END) as pending_count"),
+                DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Return' THEN 1 ELSE 0 END) as return_count"),
                 DB::raw("SUM(CASE WHEN event_transactions.review_status IS NULL OR event_transactions.review_status = 'Open' THEN 1 ELSE 0 END) as open_count")
             )
             ->groupBy('learners.PROGRAM_CODE')
@@ -599,6 +600,7 @@ class ProfileController extends Controller
 
         // Print bindings
         //dd($baseQuery->toSql());
+        //dd($statusCounts);
         return view('profile.alleventtransaction', 
         compact(
                 'event_transactions', 

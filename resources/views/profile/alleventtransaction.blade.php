@@ -483,7 +483,7 @@
                                     <td align="center"><strong>{{ $item->PROGRAM_CODE }}</strong></td>
                                     <td align="center"><strong>{{ $item->total }}</strong></td>
                                     <td align="center"><strong>{{ $item->open_count }}</strong></td>
-                                    <td align="center"><strong>{{ $item->pending_count }}</strong></td>
+                                    <td align="center"><strong>{{ $item->return_count }}</strong></td>
                                     <td align="center"><strong>{{ $item->rejected_count }}</strong></td>
                                     <td align="center"><strong>{{ $item->accepted_count }}</strong></td>
                                 </tr>
@@ -539,8 +539,9 @@
                                         $statusClass = match($status) {
                                             'Accepted' => 'accepted',
                                             'Rejected' => 'rejected',
+                                            'Return' => 'return',
                                             'Pending'  => 'pending',
-                                            default    => 'open'
+                                             default    => 'open'
                                         };
 
                                         $documents = [];
