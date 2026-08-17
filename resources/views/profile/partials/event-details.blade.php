@@ -197,7 +197,7 @@
             }
         }
     </style>
-
+<?php //dd($event_transactions);?>
  
 
     @php

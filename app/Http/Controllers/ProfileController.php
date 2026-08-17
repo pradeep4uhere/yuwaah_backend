@@ -627,10 +627,10 @@ class ProfileController extends Controller
         }
         $event_transactions = DB::connection('mysql2')
         ->table('event_transactions')
-        ->join('yuwaah_event_masters', 'event_transactions.event_category', '=', 'yuwaah_event_masters.id')
-        ->join('yuwaah_event_type', 'yuwaah_event_type.id', '=', 'yuwaah_event_masters.event_type_id')
-        ->join('yuwaah_sakhi', 'yuwaah_sakhi.id', '=', 'event_transactions.ys_id')
-        ->join('learners', 'learners.id', '=', 'event_transactions.learner_id')
+        ->leftJoin('yuwaah_event_masters', 'event_transactions.event_category', '=', 'yuwaah_event_masters.id')
+        ->leftJoin('yuwaah_event_type', 'yuwaah_event_type.id', '=', 'yuwaah_event_masters.event_type_id')
+        ->leftJoin('yuwaah_sakhi', 'yuwaah_sakhi.id', '=', 'event_transactions.ys_id')
+        ->leftJoin('learners', 'learners.id', '=', 'event_transactions.learner_id')
         ->select(
             'event_transactions.*',
             'yuwaah_event_type.name as event_name',
@@ -655,7 +655,7 @@ class ProfileController extends Controller
         ->where('event_transactions.id', '=', $id)
         ->first();
     
-        //dd($event_transactions);
+        //dd($id);
 
         //All Comment For this Event Trasnactions
         $commentList = EventTransactionComment::where('event_transaction_id',$id)->orderBy('id','desc')->get();
