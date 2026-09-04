@@ -16,6 +16,7 @@ class EventTransactionComment extends Model
         'user_id',
         'user_name',
         'status',
+        'sakhi_id',
         'comment_type'
     ];
 }
