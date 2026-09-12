@@ -387,6 +387,36 @@ class ProfileController extends Controller
                 $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
                     $q->where('learners.PROGRAM_CODE', 'LIKE', '%Times%');
                 });
+            }elseif($request->program_code =='Skills Root Old'){
+                $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
+                    $q->where('learners.PROGRAM_CODE', '=', 'Skills Root')
+                    ->where('learners.UNIT_INSTITUTE', '=', 'Skills Root Old');
+                });
+            }elseif($request->program_code =='Head Held High Old'){
+                $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
+                    $q->where('learners.PROGRAM_CODE', '=', 'Head Held High')
+                    ->where('learners.UNIT_INSTITUTE', '=', 'Head Held High Old');
+                });
+            }elseif($request->program_code =='AISECT Old'){
+                $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
+                    $q->where('learners.PROGRAM_CODE', '=', 'AISECT')
+                    ->where('learners.UNIT_INSTITUTE', '=', 'AISECT Old');
+                });
+            }elseif($request->program_code =='Good Vision India Foundation Old'){
+                $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
+                    $q->where('learners.PROGRAM_CODE', '=', 'Good Vision India Foundation')
+                    ->where('learners.UNIT_INSTITUTE', '=', 'Good Vision India Foundation Old');
+                });
+            }elseif($request->program_code =='NIIT Foundation Old'){
+                $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
+                    $q->where('learners.PROGRAM_CODE', '=', 'NIIT Foundation')
+                    ->where('learners.UNIT_INSTITUTE', '=', 'NIIT Foundation Old');
+                });
+            }elseif($request->program_code =='B-ABLE Foundation Old'){
+                $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
+                    $q->where('learners.PROGRAM_CODE', '=', 'B-ABLE Foundation')
+                    ->where('learners.UNIT_INSTITUTE', '=', 'B-ABLE Foundation Old');
+                });
             }else{
                 $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
                     $q->where('learners.PROGRAM_CODE', $request->program_code);
