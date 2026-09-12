@@ -340,297 +340,735 @@ class ProfileController extends Controller
                 ->where('event_type_id', $request->event_type)
                 ->get();
             }
+// =====================================================
+// BASE QUERY
+// =====================================================
+
+$baseQuery = DB::connection('mysql2')
+    ->table('event_transactions')
+    ->leftJoin('yuwaah_event_masters', 'event_transactions.event_category', '=', 'yuwaah_event_masters.id')
+    ->leftJoin('yuwaah_event_type', 'yuwaah_event_masters.event_type_id', '=', 'yuwaah_event_type.id')
+    ->leftJoin('yuwaah_sakhi', 'event_transactions.ys_id', '=', 'yuwaah_sakhi.id')
+    ->leftJoin('learners', 'learners.id', '=', 'event_transactions.learner_id')
+    ->where('yuwaah_sakhi.csc_id', '!=', 'Sandbox_Testing')
+    ->whereNotNull('event_transactions.review_status')
+    ->whereNotNull('event_transactions.event_date_submitted')
+    ->whereNotNull('event_transactions.learner_id');
 
 
-            $baseQuery = DB::connection('mysql2')
-            ->table('event_transactions')
-            ->leftJoin('yuwaah_event_masters', 'event_transactions.event_category', '=', 'yuwaah_event_masters.id')
-            ->leftJoin('yuwaah_event_type', 'yuwaah_event_masters.event_type_id', '=', 'yuwaah_event_type.id')
-            ->leftJoin('yuwaah_sakhi', 'event_transactions.ys_id', '=', 'yuwaah_sakhi.id')
-            ->leftjoin('learners', 'learners.id', '=', 'event_transactions.learner_id')
-            ->where('yuwaah_sakhi.csc_id','!=','Sandbox_Testing')
-            ->whereNotNull('event_transactions.review_status')
-            ->whereNotNull('event_transactions.event_date_submitted')
-            ->whereNotNull('event_transactions.learner_id');
+// =====================================================
+// EVENT TYPE
+// =====================================================
 
-           
-            $baseQuery->when($request->filled('status'), function ($q) use ($request) {
-                $q->where('event_transactions.review_status', $request->status);
-            });
-            
-            $baseQuery->when($request->event_type > 0, function ($q) use ($request) {
-                $q->where('yuwaah_event_type.id', $request->event_type);
-            });
+$baseQuery->when(
+    $request->filled('event_type') && $request->event_type > 0,
+    function ($q) use ($request) {
+        $q->where('yuwaah_event_type.id', $request->event_type);
+    }
+);
 
 
-          
-            
-            $baseQuery->when($request->sakhi_id > 0, function ($q) use ($request) {
-                $q->where('yuwaah_sakhi.sakhi_id', $request->sakhi_id);
-            });
-            
-            
-            $baseQuery->when($request->event_category > 0, function ($q) use ($request) {
-                $q->where('event_transactions.event_category', $request->event_category);
-            });
-            
-            $baseQuery->when(
-                $request->filled('from_date') && $request->filled('to_date'),
-                function ($q) use ($request) {
-                    $q->where('event_transactions.event_date_submitted', '>=', $request->from_date)
-                      ->where('event_transactions.event_date_submitted', '<=', $request->to_date);
-                }
-            );
-            
-            //dd($request->program_code);
-            if($request->program_code =='Times Foundation'){
-                $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
-                    $q->where('learners.PROGRAM_CODE', 'LIKE', '%Times%');
-                });
-            }elseif($request->program_code =='Skills Root Old'){
-                $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
-                    $q->where('learners.PROGRAM_CODE', '=', 'Skills Root')
-                    ->where('learners.UNIT_INSTITUTE', '=', 'Skills Root Old');
-                });
-            }elseif($request->program_code =='Head Held High Old'){
-                $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
-                    $q->where('learners.PROGRAM_CODE', '=', 'Head Held High')
-                    ->where('learners.UNIT_INSTITUTE', '=', 'Head Held High Old');
-                });
-            }elseif($request->program_code =='AISECT Old'){
-                $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
-                    $q->where('learners.PROGRAM_CODE', '=', 'AISECT')
-                    ->where('learners.UNIT_INSTITUTE', '=', 'AISECT Old');
-                });
-            }elseif($request->program_code =='Good Vision India Foundation Old'){
-                $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
-                    $q->where('learners.PROGRAM_CODE', '=', 'Good Vision India Foundation')
-                    ->where('learners.UNIT_INSTITUTE', '=', 'Good Vision India Foundation Old');
-                });
-            }elseif($request->program_code =='NIIT Foundation Old'){
-                $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
-                    $q->where('learners.PROGRAM_CODE', '=', 'NIIT Foundation')
-                    ->where('learners.UNIT_INSTITUTE', '=', 'NIIT Foundation Old');
-                });
-            }elseif($request->program_code =='B-ABLE Foundation Old'){
-                $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
-                    $q->where('learners.PROGRAM_CODE', '=', 'B-ABLE Foundation')
-                    ->where('learners.UNIT_INSTITUTE', '=', 'B-ABLE Foundation Old');
-                });
-            }else{
-                $baseQuery->when($request->filled('program_code'), function ($q) use ($request) {
-                    $q->where('learners.PROGRAM_CODE', $request->program_code);
-                });
-            }
+// =====================================================
+// SAKHI
+// =====================================================
 
-            
-            $baseQuery->when($request->filled('benificiery_name'), function ($q) use ($request) {
-               
-                $q->where('event_transactions.beneficiary_name', 'like', "%{$request->benificiery_name}%");
-            });
-
-            $baseQuery->when($request->filled('id'), function ($q) use ($request) {
-                $q->where('event_transactions.id', '=', $request->id);
-            });
-
-            $baseQuery->when($request->filled('benificiery_mobile'), function ($q) use ($request) {
-                //dd($request->benificiery_mobile);
-                $q->where('event_transactions.beneficiary_phone_number', $request->benificiery_mobile);
-            });
+$baseQuery->when(
+    $request->filled('sakhi_id') && $request->sakhi_id > 0,
+    function ($q) use ($request) {
+        $q->where('yuwaah_sakhi.sakhi_id', $request->sakhi_id);
+    }
+);
 
 
-            $baseQuery->when($request->filled('submitted_date'), function ($q) use ($request) {
-                $q->where('event_transactions.event_date_submitted', $request->submitted_date);
-            });
+// =====================================================
+// EVENT CATEGORY
+// =====================================================
 
-            //dd( $baseQuery);
-            $event_transactions = (clone $baseQuery)
-            ->select(
-                'event_transactions.*',
-                'event_transactions.beneficiary_name as beneficiary_name',
-                'yuwaah_event_masters.event_type as event_master_name',
-                'yuwaah_event_masters.event_category as event_master_category',
-                'yuwaah_event_masters.description',
-                'yuwaah_event_masters.eligibility',
-                'yuwaah_event_masters.fee_per_completed_transaction',
-                'yuwaah_event_masters.date_event_created_in_master',
-                'yuwaah_event_masters.document_1',
-                'yuwaah_event_masters.document_2',
-                'yuwaah_event_masters.document_3',
-                'yuwaah_event_masters.status',
-                'yuwaah_sakhi.csc_id',
-                'yuwaah_sakhi.name as field_agent_name',
-                'yuwaah_sakhi.sakhi_id',
-                'yuwaah_event_type.name as event_name',
-                'learners.PROGRAM_STATE',
-                'learners.PROGRAM_DISTRICT',
-                'learners.PROGRAM_CODE'
-            )
-            ->orderBy('event_transactions.review_status')
-            ->orderBy('event_transactions.id', 'desc')
-            ->paginate(50);
+$baseQuery->when(
+    $request->filled('event_category') && $request->event_category > 0,
+    function ($q) use ($request) {
+        $q->where('event_transactions.event_category', $request->event_category);
+    }
+);
 
-            //dd($baseQuery->toSql());
-            //dd($event_transactions);
-            $statusCounts = [];
-            $statusCounts = (clone $baseQuery)
-            ->select(
+
+// =====================================================
+// DATE RANGE
+// =====================================================
+
+$baseQuery->when(
+    $request->filled('from_date') && $request->filled('to_date'),
+    function ($q) use ($request) {
+
+        $q->whereBetween(
+            'event_transactions.event_date_submitted',
+            [
+                $request->from_date,
+                $request->to_date
+            ]
+        );
+    }
+);
+
+
+// =====================================================
+// PROGRAM
+// =====================================================
+
+if ($request->filled('program_code')) {
+
+    switch ($request->program_code) {
+
+        case 'Times Foundation':
+
+            $baseQuery->where(
                 'learners.PROGRAM_CODE',
-                DB::raw("COUNT(*) as total"),
-                DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Accepted' THEN 1 ELSE 0 END) as accepted_count"),
-                DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Rejected' THEN 1 ELSE 0 END) as rejected_count"),
-                DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Pending' THEN 1 ELSE 0 END) as pending_count"),
-                DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Return' THEN 1 ELSE 0 END) as return_count"),
-                DB::raw("SUM(CASE WHEN event_transactions.review_status IS NULL OR event_transactions.review_status = 'Open' THEN 1 ELSE 0 END) as open_count")
-            )
-            ->groupBy('learners.PROGRAM_CODE')
-            ->orderBy('learners.PROGRAM_CODE')
-            ->get();
+                'LIKE',
+                '%Times%'
+            );
 
-            //dd($event_transactions);
-        
-        //     $query = DB::connection('mysql2')
-        //         ->table('event_transactions')
-        //         ->leftJoin('yuwaah_event_masters', 'event_transactions.event_category', '=', 'yuwaah_event_masters.id')
-        //         ->leftJoin('yuwaah_event_type', 'yuwaah_event_masters.event_type_id', '=', 'yuwaah_event_type.id')
-        //         ->leftJoin('yuwaah_sakhi', 'event_transactions.ys_id', '=', 'yuwaah_sakhi.id')
-        //         ->join('learners', 'learners.id', '=', 'event_transactions.learner_id')
-        //         ->select(
-        //             'event_transactions.*',
-        //             'yuwaah_event_masters.event_type as event_master_name',
-        //             'yuwaah_event_masters.event_category as event_master_category',
-        //             'yuwaah_event_masters.description',
-        //             'yuwaah_event_masters.eligibility',
-        //             'yuwaah_event_masters.fee_per_completed_transaction',
-        //             'yuwaah_event_masters.date_event_created_in_master',
-        //             'yuwaah_event_masters.document_1',
-        //             'yuwaah_event_masters.document_2',
-        //             'yuwaah_event_masters.document_3',
-        //             'yuwaah_event_masters.status',
-        //             'yuwaah_sakhi.csc_id',
-        //             'yuwaah_sakhi.name as field_agent_name',
-        //             'yuwaah_sakhi.sakhi_id',
-        //             'yuwaah_event_type.name as event_name',
-        //             'learners.PROGRAM_STATE',
-        //             'learners.PROGRAM_DISTRICT',
-        //             'learners.PROGRAM_CODE'
-        //         )
-        //         ->where('yuwaah_sakhi.csc_id','!=','Sandbox_Testing')
-        //         ->orderBy('event_transactions.id', 'desc');
-        
-            
-        // $statusCounts = DB::connection('mysql2')
-        //     ->table('event_transactions')
-        //     ->join('learners', 'learners.id', '=', 'event_transactions.learner_id')
-        //     ->select(
-        //         'learners.PROGRAM_CODE',
+            break;
 
-        //         DB::raw("COUNT(*) as total"),
 
-        //         DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Accepted' THEN 1 ELSE 0 END) as accepted_count"),
+        case 'Skills Root Old':
 
-        //         DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Rejected' THEN 1 ELSE 0 END) as rejected_count"),
+            $baseQuery
+                ->where('learners.PROGRAM_CODE', 'Skills Root')
+                ->where('learners.UNIT_INSTITUTE', 'Skills Root Old');
 
-        //         DB::raw("SUM(CASE WHEN event_transactions.review_status = 'Pending' THEN 1 ELSE 0 END) as pending_count"),
+            break;
 
-        //         DB::raw("SUM(CASE WHEN event_transactions.review_status IS NULL OR event_transactions.review_status = '' THEN 1 ELSE 0 END) as open_count")
-        //     )
-        //     ->groupBy('learners.PROGRAM_CODE')
-        //     ->orderBy('learners.PROGRAM_CODE')
-        //     ->get();
-            
-        //     /* Apply filters only if values exist */
-        //     if ($request->filled('submit')) {
 
-        //         $query->where(function ($q) use ($request) {
-            
-        //             // STATUS
-        //             if ($request->filled('status')) {
-        //                 if($request->status!=''){
-        //                     //dd($request->status);
-        //                     $q->Where('event_transactions.review_status', $request->status);
-        //                 }
-        //             }
-            
-        //             // EVENT TYPE
-        //             if ($request->event_type > 0) {
-        //                 //dd($request->event_type);
-        //                 $q->Where('yuwaah_event_type.id', $request->event_type);
-        //             }
-            
-        //             // EVENT CATEGORY
-        //             if ($request->event_category > 0) {
-        //                 $q->orWhere('event_transactions.event_category', $request->event_category);
-        //             }
-            
-        //             // DATE RANGE
-        //             if ($request->from_date != '' && $request->to_date != '') {
-        //                 $q->orWhereBetween('event_transactions.created_at', [
-        //                     $request->from_date,
-        //                     $request->to_date
-        //                 ]);
-        //             }
-        //             if ($request->filled('benificiery_name')) {
-        //                 $q->Where('event_transactions.beneficiary_name', 'like', "%{$request->benificiery_name}%");
-        //             }
-            
-        //             if ($request->filled('benificiery_mobile')) {
-        //                 $q->Where('event_transactions.beneficiary_phone_number', 'like', "%{$request->benificiery_mobile}%");
-        //             }
+        case 'Head Held High Old':
 
-        //             if ($request->filled('sakhi_id')) {
-        //                 $q->Where('yuwaah_sakhi.sakhi_id', 'like', "%{$request->sakhi_id}%");
-        //             }
-            
+            $baseQuery
+                ->where('learners.PROGRAM_CODE', 'Head Held High')
+                ->where('learners.UNIT_INSTITUTE', 'Head Held High Old');
 
-        //             if ($request->filled('program_code')) {
-        //                 $q->Where('learners.PROGRAM_CODE', 'like', "%{$request->program_code}%");
-        //             }
-            
-            
-        //             if ($request->filled('search_text')) {
-        //                 $search = $request->search_text;
-        //                 $q->orWhere(function ($qq) use ($search) {
-        //                     $qq->where('event_transactions.beneficiary_name', 'like', "%$search%")
-        //                     ->orWhere('event_transactions.beneficiary_phone_number', 'like', "%$search%")
-        //                     ->orWhere('event_transactions.event_value', 'like', "%$search%");
-        //                 });
-        //             }
-                    
-        //             // You can add more OR conditions here...
-        //         });
-        //     }
-        // /*
-        //     if ($request->filled('benificiery_name')) {
-        //         $query->where('event_transactions.beneficiary_name', 'like', "%{$request->benificiery_name}%");
-        //     }
-        
-        //     if ($request->filled('benificiery_mobile')) {
-        //         $query->where('event_transactions.beneficiary_phone_number', 'like', "%{$request->benificiery_mobile}%");
-        //     }
-        
-        //     if ($request->filled('search_text')) {
-        //         $search = $request->search_text;
-        //         $query->where(function ($q) use ($search) {
-        //             $q->where('event_transactions.beneficiary_name', 'like', "%$search%")
-        //             ->orWhere('event_transactions.beneficiary_phone_number', 'like', "%$search%")
-        //             ->orWhere('event_transactions.event_value', 'like', "%$search%");
-        //         });
-        //     }*/
-            
-            
-        
-        //     $event_transactions = $query
-        //     ->orderBy('event_transactions.review_status')
-        //     ->orderBy('event_transactions.id', 'desc')
-        //     ->paginate(50);
-        //     //dd($event_transactions);
-        
-        //dd($statusCounts);
+            break;
 
-        // Print bindings
-        //dd($baseQuery->toSql());
-        //dd($statusCounts);
+
+        case 'AISECT Old':
+
+            $baseQuery
+                ->where('learners.PROGRAM_CODE', 'AISECT')
+                ->where('learners.UNIT_INSTITUTE', 'AISECT Old');
+
+            break;
+
+
+        case 'Good Vision India Foundation Old':
+
+            $baseQuery
+                ->where('learners.PROGRAM_CODE', 'Good Vision India Foundation')
+                ->where('learners.UNIT_INSTITUTE', 'Good Vision India Foundation Old');
+
+            break;
+
+
+        case 'NIIT Foundation Old':
+
+            $baseQuery
+                ->where('learners.PROGRAM_CODE', 'NIIT Foundation')
+                ->where('learners.UNIT_INSTITUTE', 'NIIT Foundation Old');
+
+            break;
+
+
+        case 'B-ABLE Foundation Old':
+
+            $baseQuery
+                ->where('learners.PROGRAM_CODE', 'B-ABLE Foundation')
+                ->where('learners.UNIT_INSTITUTE', 'B-ABLE Foundation Old');
+
+            break;
+
+
+        default:
+
+            $baseQuery->where(
+                'learners.PROGRAM_CODE',
+                $request->program_code
+            );
+
+            break;
+    }
+}
+
+
+// =====================================================
+// BENEFICIARY NAME
+// =====================================================
+
+$baseQuery->when(
+    $request->filled('benificiery_name'),
+    function ($q) use ($request) {
+
+        $q->where(
+            'event_transactions.beneficiary_name',
+            'like',
+            '%' . $request->benificiery_name . '%'
+        );
+    }
+);
+
+
+// =====================================================
+// EVENT TRANSACTION ID
+// =====================================================
+
+$baseQuery->when(
+    $request->filled('id'),
+    function ($q) use ($request) {
+
+        $q->where(
+            'event_transactions.id',
+            $request->id
+        );
+    }
+);
+
+
+// =====================================================
+// MOBILE
+// =====================================================
+
+$baseQuery->when(
+    $request->filled('benificiery_mobile'),
+    function ($q) use ($request) {
+
+        $q->where(
+            'event_transactions.beneficiary_phone_number',
+            $request->benificiery_mobile
+        );
+    }
+);
+
+
+// =====================================================
+// SUBMITTED DATE
+// =====================================================
+
+$baseQuery->when(
+    $request->filled('submitted_date'),
+    function ($q) use ($request) {
+
+        $q->where(
+            'event_transactions.event_date_submitted',
+            $request->submitted_date
+        );
+    }
+);
+
+// =====================================================
+// BASE QUERY
+// =====================================================
+
+$baseQuery = DB::connection('mysql2')
+    ->table('event_transactions')
+    ->leftJoin(
+        'yuwaah_event_masters',
+        'event_transactions.event_category',
+        '=',
+        'yuwaah_event_masters.id'
+    )
+    ->leftJoin(
+        'yuwaah_event_type',
+        'yuwaah_event_masters.event_type_id',
+        '=',
+        'yuwaah_event_type.id'
+    )
+    ->leftJoin(
+        'yuwaah_sakhi',
+        'event_transactions.ys_id',
+        '=',
+        'yuwaah_sakhi.id'
+    )
+    ->leftJoin(
+        'learners',
+        'learners.id',
+        '=',
+        'event_transactions.learner_id'
+    )
+    ->where(
+        'yuwaah_sakhi.csc_id',
+        '!=',
+        'Sandbox_Testing'
+    )
+    ->whereNotNull('event_transactions.review_status')
+    ->whereNotNull('event_transactions.event_date_submitted')
+    ->whereNotNull('event_transactions.learner_id');
+
+
+// =====================================================
+// EVENT TYPE FILTER
+// =====================================================
+
+$baseQuery->when(
+    $request->filled('event_type') && $request->event_type > 0,
+    function ($q) use ($request) {
+        $q->where(
+            'yuwaah_event_type.id',
+            $request->event_type
+        );
+    }
+);
+
+
+// =====================================================
+// SAKHI FILTER
+// =====================================================
+
+$baseQuery->when(
+    $request->filled('sakhi_id') && $request->sakhi_id > 0,
+    function ($q) use ($request) {
+        $q->where(
+            'yuwaah_sakhi.sakhi_id',
+            $request->sakhi_id
+        );
+    }
+);
+
+
+// =====================================================
+// EVENT CATEGORY FILTER
+// =====================================================
+
+$baseQuery->when(
+    $request->filled('event_category') && $request->event_category > 0,
+    function ($q) use ($request) {
+        $q->where(
+            'event_transactions.event_category',
+            $request->event_category
+        );
+    }
+);
+
+
+// =====================================================
+// DATE RANGE FILTER
+// =====================================================
+
+$baseQuery->when(
+    $request->filled('from_date') &&
+    $request->filled('to_date'),
+    function ($q) use ($request) {
+
+        $q->where(
+            'event_transactions.event_date_submitted',
+            '>=',
+            $request->from_date
+        );
+
+        $q->where(
+            'event_transactions.event_date_submitted',
+            '<=',
+            $request->to_date
+        );
+    }
+);
+
+
+// =====================================================
+// PROGRAM FILTER
+// =====================================================
+
+if ($request->filled('program_code')) {
+
+    switch ($request->program_code) {
+
+        case 'Times Foundation':
+
+            $baseQuery->where(
+                'learners.PROGRAM_CODE',
+                'LIKE',
+                '%Times%'
+            );
+
+            break;
+
+
+        case 'Skills Root Old':
+
+            $baseQuery
+                ->where(
+                    'learners.PROGRAM_CODE',
+                    'Skills Root'
+                )
+                ->where(
+                    'learners.UNIT_INSTITUTE',
+                    'Skills Root Old'
+                );
+
+            break;
+
+
+        case 'Head Held High Old':
+
+            $baseQuery
+                ->where(
+                    'learners.PROGRAM_CODE',
+                    'Head Held High'
+                )
+                ->where(
+                    'learners.UNIT_INSTITUTE',
+                    'Head Held High Old'
+                );
+
+            break;
+
+
+        case 'AISECT Old':
+
+            $baseQuery
+                ->where(
+                    'learners.PROGRAM_CODE',
+                    'AISECT'
+                )
+                ->where(
+                    'learners.UNIT_INSTITUTE',
+                    'AISECT Old'
+                );
+
+            break;
+
+
+        case 'Good Vision India Foundation Old':
+
+            $baseQuery
+                ->where(
+                    'learners.PROGRAM_CODE',
+                    'Good Vision India Foundation'
+                )
+                ->where(
+                    'learners.UNIT_INSTITUTE',
+                    'Good Vision India Foundation Old'
+                );
+
+            break;
+
+
+        case 'NIIT Foundation Old':
+
+            $baseQuery
+                ->where(
+                    'learners.PROGRAM_CODE',
+                    'NIIT Foundation'
+                )
+                ->where(
+                    'learners.UNIT_INSTITUTE',
+                    'NIIT Foundation Old'
+                );
+
+            break;
+
+
+        case 'B-ABLE Foundation Old':
+
+            $baseQuery
+                ->where(
+                    'learners.PROGRAM_CODE',
+                    'B-ABLE Foundation'
+                )
+                ->where(
+                    'learners.UNIT_INSTITUTE',
+                    'B-ABLE Foundation Old'
+                );
+
+            break;
+
+
+        default:
+
+            $baseQuery->where(
+                'learners.PROGRAM_CODE',
+                $request->program_code
+            );
+
+            break;
+    }
+}
+
+
+// =====================================================
+// BENEFICIARY NAME FILTER
+// =====================================================
+
+$baseQuery->when(
+    $request->filled('benificiery_name'),
+    function ($q) use ($request) {
+
+        $q->where(
+            'event_transactions.beneficiary_name',
+            'like',
+            '%' . $request->benificiery_name . '%'
+        );
+    }
+);
+
+
+// =====================================================
+// EVENT TRANSACTION ID FILTER
+// =====================================================
+
+$baseQuery->when(
+    $request->filled('id'),
+    function ($q) use ($request) {
+
+        $q->where(
+            'event_transactions.id',
+            $request->id
+        );
+    }
+);
+
+
+// =====================================================
+// BENEFICIARY MOBILE FILTER
+// =====================================================
+
+$baseQuery->when(
+    $request->filled('benificiery_mobile'),
+    function ($q) use ($request) {
+
+        $q->where(
+            'event_transactions.beneficiary_phone_number',
+            $request->benificiery_mobile
+        );
+    }
+);
+
+
+// =====================================================
+// SUBMITTED DATE FILTER
+// =====================================================
+
+$baseQuery->when(
+    $request->filled('submitted_date'),
+    function ($q) use ($request) {
+
+        $q->where(
+            'event_transactions.event_date_submitted',
+            $request->submitted_date
+        );
+    }
+);
+
+
+// =====================================================
+// IMPORTANT
+// =====================================================
+// DO NOT APPLY $request->status BEFORE STATUS COUNTS.
+//
+// Status counts must calculate:
+// Accepted
+// Rejected
+// Pending
+// Return
+// Open
+//
+// independently of the selected status filter.
+// =====================================================
+
+
+// =====================================================
+// STATUS COUNTS
+// =====================================================
+
+$statusCounts = (clone $baseQuery)
+    ->select(
+
+        // Keep normal PROGRAM_CODE
+        // Old institutions will be separated below.
+        DB::raw("
+            CASE
+
+                WHEN TRIM(learners.UNIT_INSTITUTE) = 'Skills Root Old'
+                    THEN 'Skills Root Old'
+
+                WHEN TRIM(learners.UNIT_INSTITUTE) = 'Head Held High Old'
+                    THEN 'Head Held High Old'
+
+                WHEN TRIM(learners.UNIT_INSTITUTE) = 'AISECT Old'
+                    THEN 'AISECT Old'
+
+                WHEN TRIM(learners.UNIT_INSTITUTE) = 'Good Vision India Foundation Old'
+                    THEN 'Good Vision India Foundation Old'
+
+                WHEN TRIM(learners.UNIT_INSTITUTE) = 'NIIT Foundation Old'
+                    THEN 'NIIT Foundation Old'
+
+                WHEN TRIM(learners.UNIT_INSTITUTE) = 'B-ABLE Foundation Old'
+                    THEN 'B-ABLE Foundation Old'
+
+                ELSE learners.PROGRAM_CODE
+
+            END AS program_name
+        "),
+
+        DB::raw("
+            COUNT(*) AS total
+        "),
+
+        DB::raw("
+            SUM(
+                CASE
+                    WHEN event_transactions.review_status = 'Accepted'
+                    THEN 1
+                    ELSE 0
+                END
+            ) AS accepted_count
+        "),
+
+        DB::raw("
+            SUM(
+                CASE
+                    WHEN event_transactions.review_status = 'Rejected'
+                    THEN 1
+                    ELSE 0
+                END
+            ) AS rejected_count
+        "),
+
+        DB::raw("
+            SUM(
+                CASE
+                    WHEN event_transactions.review_status = 'Pending'
+                    THEN 1
+                    ELSE 0
+                END
+            ) AS pending_count
+        "),
+
+        DB::raw("
+            SUM(
+                CASE
+                    WHEN event_transactions.review_status = 'Return'
+                    THEN 1
+                    ELSE 0
+                END
+            ) AS return_count
+        "),
+
+        DB::raw("
+            SUM(
+                CASE
+                    WHEN event_transactions.review_status = 'Open'
+                    THEN 1
+                    ELSE 0
+                END
+            ) AS open_count
+        ")
+    )
+    ->groupBy(
+        DB::raw("
+            CASE
+
+                WHEN TRIM(learners.UNIT_INSTITUTE) = 'Skills Root Old'
+                    THEN 'Skills Root Old'
+
+                WHEN TRIM(learners.UNIT_INSTITUTE) = 'Head Held High Old'
+                    THEN 'Head Held High Old'
+
+                WHEN TRIM(learners.UNIT_INSTITUTE) = 'AISECT Old'
+                    THEN 'AISECT Old'
+
+                WHEN TRIM(learners.UNIT_INSTITUTE) = 'Good Vision India Foundation Old'
+                    THEN 'Good Vision India Foundation Old'
+
+                WHEN TRIM(learners.UNIT_INSTITUTE) = 'NIIT Foundation Old'
+                    THEN 'NIIT Foundation Old'
+
+                WHEN TRIM(learners.UNIT_INSTITUTE) = 'B-ABLE Foundation Old'
+                    THEN 'B-ABLE Foundation Old'
+
+                ELSE learners.PROGRAM_CODE
+
+            END
+        ")
+    )
+    ->orderBy('program_name')
+    ->get();
+
+
+// =====================================================
+// APPLY STATUS FILTER ONLY FOR TRANSACTION LIST
+// =====================================================
+
+$filteredQuery = clone $baseQuery;
+
+$filteredQuery->when(
+    $request->filled('status'),
+    function ($q) use ($request) {
+
+        $q->where(
+            'event_transactions.review_status',
+            $request->status
+        );
+    }
+);
+
+
+// =====================================================
+// EVENT TRANSACTIONS LIST
+// =====================================================
+
+$event_transactions = $filteredQuery
+
+    ->select(
+
+        'event_transactions.*',
+
+        'event_transactions.beneficiary_name as beneficiary_name',
+
+        'yuwaah_event_masters.event_type as event_master_name',
+
+        'yuwaah_event_masters.event_category as event_master_category',
+
+        'yuwaah_event_masters.description',
+
+        'yuwaah_event_masters.eligibility',
+
+        'yuwaah_event_masters.fee_per_completed_transaction',
+
+        'yuwaah_event_masters.date_event_created_in_master',
+
+        'yuwaah_event_masters.document_1',
+
+        'yuwaah_event_masters.document_2',
+
+        'yuwaah_event_masters.document_3',
+
+        'yuwaah_event_masters.status',
+
+        'yuwaah_sakhi.csc_id',
+
+        'yuwaah_sakhi.name as field_agent_name',
+
+        'yuwaah_sakhi.sakhi_id',
+
+        'yuwaah_event_type.name as event_name',
+
+        'learners.PROGRAM_STATE',
+
+        'learners.PROGRAM_DISTRICT',
+
+        'learners.PROGRAM_CODE',
+
+        'learners.UNIT_INSTITUTE'
+    )
+
+    ->orderBy(
+        'event_transactions.review_status'
+    )
+
+    ->orderBy(
+        'event_transactions.id',
+        'desc'
+    )
+
+    ->paginate(50);
+       
         return view('profile.alleventtransaction', 
         compact(
                 'event_transactions', 

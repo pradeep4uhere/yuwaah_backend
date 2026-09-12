@@ -362,7 +362,7 @@
                                         <select class="premium-form-control" name="status">
                                             <option value="">All</option>
                                             <option value="Open" {{ request('status') == 'Open' ? 'selected' : '' }}>Open</option>
-                                            <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Return</option>
+                                            <option value="Return" {{ request('status') == 'Return' ? 'selected' : '' }}>Return</option>
                                             <option value="Rejected" {{ request('status') == 'Rejected' ? 'selected' : '' }}>Rejected</option>
                                             <option value="Accepted" {{ request('status') == 'Accepted' ? 'selected' : '' }}>Accepted</option>
                                         </select>
@@ -480,7 +480,7 @@
                         <tbody>
                             @foreach($statusCounts as $item)
                                 <tr style="font-size:13px">
-                                    <td align="center"><strong>{{ $item->PROGRAM_CODE }}</strong></td>
+                                    <td align="center"><strong>{{ $item->program_name }}</strong></td>
                                     <td align="center"><strong>{{ $item->total }}</strong></td>
                                     <td align="center"><strong>{{ $item->open_count }}</strong></td>
                                     <td align="center"><strong>{{ $item->return_count }}</strong></td>
