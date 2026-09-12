@@ -1,5 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
+        
         <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
             <div>
                 <h2 class="premium-page-title mb-1">
@@ -330,6 +331,515 @@
         }
     </style>
 
+    <style>
+        /* =====================================================
+   PROGRAM SUMMARY COLLAPSE
+===================================================== */
+
+.summary-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.06);
+    transition: all 0.25s ease;
+    white-space: nowrap;
+}
+
+.summary-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.summary-toggle-icon {
+    font-size: 10px;
+    transition: transform 0.25s ease;
+}
+
+
+/* When opened */
+
+.premium-card-header[aria-expanded="true"] .summary-toggle-text {
+    font-size: 0;
+}
+
+.premium-card-header[aria-expanded="true"] .summary-toggle-text::after {
+    content: "Click to Hide";
+    font-size: 12px;
+}
+
+.premium-card-header[aria-expanded="true"] .summary-toggle-icon {
+    transform: rotate(180deg);
+}
+
+
+/* Mobile */
+
+@media (max-width: 768px) {
+
+    .premium-card-header {
+        gap: 12px;
+    }
+
+    .premium-card-title {
+        font-size: 15px;
+    }
+
+    .premium-card-subtitle {
+        font-size: 11px;
+    }
+
+    .summary-toggle-btn {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+
+}
+    </style>
+
+    <style>
+        /* =========================================================
+   PREMIUM PROGRAM SUMMARY TABLE
+   ========================================================= */
+
+.premium-summary-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 6px;
+    margin-top: 5px;
+}
+
+
+/* ---------------------------------------------------------
+   HEADER
+--------------------------------------------------------- */
+
+.premium-summary-table thead th {
+    background: linear-gradient(135deg, #172554, #1e3a8a);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 13px 12px;
+    border: none;
+    white-space: nowrap;
+}
+
+.premium-summary-table thead th:first-child {
+    border-radius: 10px 0 0 10px;
+}
+
+.premium-summary-table thead th:last-child {
+    border-radius: 0 10px 10px 0;
+}
+
+
+/* ---------------------------------------------------------
+   BODY ROW
+--------------------------------------------------------- */
+
+.premium-summary-table tbody tr {
+    background: #ffffff;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.premium-summary-table tbody tr:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+}
+
+
+/* ---------------------------------------------------------
+   CELLS
+--------------------------------------------------------- */
+
+.premium-summary-table tbody td {
+    padding: 11px 12px;
+    border-top: 1px solid #eef2f7;
+    border-bottom: 1px solid #eef2f7;
+    color: #334155;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.premium-summary-table tbody td:first-child {
+    border-left: 1px solid #eef2f7;
+    border-radius: 10px 0 0 10px;
+}
+
+.premium-summary-table tbody td:last-child {
+    border-right: 1px solid #eef2f7;
+    border-radius: 0 10px 10px 0;
+}
+
+
+/* ---------------------------------------------------------
+   PROGRAM NAME
+--------------------------------------------------------- */
+
+.premium-summary-table tbody td:first-child strong {
+    color: #172554;
+    font-weight: 700;
+}
+
+
+/* ---------------------------------------------------------
+   TOTAL EVENT
+--------------------------------------------------------- */
+
+.premium-summary-table tbody td:nth-child(2) strong {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 55px;
+    padding: 5px 10px;
+    border-radius: 7px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-weight: 700;
+}
+
+
+/* ---------------------------------------------------------
+   OPEN
+--------------------------------------------------------- */
+
+.premium-summary-table tbody td:nth-child(3) strong {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+    padding: 5px 10px;
+    border-radius: 7px;
+    background: #fff7ed;
+    color: #c2410c;
+    font-weight: 700;
+}
+
+
+/* ---------------------------------------------------------
+   RETURN
+--------------------------------------------------------- */
+
+.premium-summary-table tbody td:nth-child(4) strong {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+    padding: 5px 10px;
+    border-radius: 7px;
+    background: #fefce8;
+    color: #a16207;
+    font-weight: 700;
+}
+
+
+/* ---------------------------------------------------------
+   REJECTED
+--------------------------------------------------------- */
+
+.premium-summary-table tbody td:nth-child(5) strong {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+    padding: 5px 10px;
+    border-radius: 7px;
+    background: #fef2f2;
+    color: #dc2626;
+    font-weight: 700;
+}
+
+
+/* ---------------------------------------------------------
+   ACCEPTED
+--------------------------------------------------------- */
+
+.premium-summary-table tbody td:nth-child(6) strong {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+    padding: 5px 10px;
+    border-radius: 7px;
+    background: #ecfdf5;
+    color: #047857;
+    font-weight: 700;
+}
+
+
+/* ---------------------------------------------------------
+   FIRST COLUMN EMPHASIS
+--------------------------------------------------------- */
+
+.premium-summary-table tbody tr:hover td:first-child {
+    border-left: 3px solid #2563eb;
+}
+
+
+/* ---------------------------------------------------------
+   HEADER + COLLAPSE BUTTON
+--------------------------------------------------------- */
+
+.premium-card-header {
+    background: linear-gradient(
+        135deg,
+        #0f172a 0%,
+        #172554 55%,
+        #1e3a8a 100%
+    );
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 16px 20px;
+}
+
+.premium-card-title {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.premium-card-subtitle {
+    color: rgba(255, 255, 255, 0.68);
+}
+
+
+/* ---------------------------------------------------------
+   CLICK TO SEE BUTTON
+--------------------------------------------------------- */
+
+.summary-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 13px;
+
+    color: #ffffff;
+
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.20);
+
+    border-radius: 8px;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    backdrop-filter: blur(8px);
+
+    transition: all 0.25s ease;
+}
+
+.summary-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.35);
+    transform: translateY(-1px);
+}
+
+.summary-toggle-icon {
+    transition: transform 0.25s ease;
+}
+
+.premium-card-header[aria-expanded="true"] .summary-toggle-icon {
+    transform: rotate(180deg);
+}
+
+
+/* ---------------------------------------------------------
+   TABLE CONTAINER
+--------------------------------------------------------- */
+
+.premium-card-body {
+    padding: 14px;
+    background: #f8fafc;
+    border-radius: 0 0 12px 12px;
+}
+
+
+/* ---------------------------------------------------------
+   MOBILE
+--------------------------------------------------------- */
+
+@media (max-width: 768px) {
+
+    .premium-card-header {
+        padding: 13px 14px;
+    }
+
+    .premium-card-title {
+        font-size: 14px;
+    }
+
+    .premium-card-subtitle {
+        font-size: 10px;
+    }
+
+    .summary-toggle-btn {
+        padding: 6px 9px;
+        font-size: 10px;
+    }
+
+    .premium-summary-table thead th {
+        font-size: 10px;
+        padding: 10px 8px;
+    }
+
+    .premium-summary-table tbody td {
+        font-size: 12px;
+        padding: 9px 8px;
+    }
+}
+
+/* =========================================================
+   EVENT TRANSACTION FILTER - PREMIUM HEADER
+========================================================= */
+
+.premium-card-header {
+    position: relative;
+    padding: 18px 22px;
+
+    background: linear-gradient(
+        135deg,
+        #0f172a 0%,
+        #172554 50%,
+        #1e40af 100%
+    );
+
+    border-radius: 12px 12px 0 0;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+
+    overflow: hidden;
+}
+
+
+/* Decorative glow */
+
+.premium-card-header::before {
+    content: "";
+    position: absolute;
+
+    width: 180px;
+    height: 180px;
+
+    right: -70px;
+    top: -100px;
+
+    background: rgba(59, 130, 246, 0.18);
+
+    border-radius: 50%;
+
+    filter: blur(20px);
+
+    pointer-events: none;
+}
+
+
+/* Small accent line */
+
+.premium-card-header::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 4px;
+    height: 100%;
+
+    background: linear-gradient(
+        180deg,
+        #60a5fa,
+        #2563eb
+    );
+
+    border-radius: 12px 0 0 12px;
+}
+
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+.premium-card-title {
+    position: relative;
+    z-index: 2;
+
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size: 18px;
+    font-weight: 700;
+
+    letter-spacing: 0.2px;
+
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   SUBTITLE
+========================================================= */
+
+.premium-card-subtitle {
+    position: relative;
+    z-index: 2;
+
+    margin: 5px 0 0;
+
+    color: rgba(255, 255, 255, 0.68);
+
+    font-size: 12px;
+
+    font-weight: 400;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   HOVER EFFECT
+========================================================= */
+
+.premium-card-header {
+    transition:
+        box-shadow 0.25s ease,
+        transform 0.25s ease;
+}
+
+.premium-card-header:hover {
+    box-shadow:
+        0 8px 25px rgba(15, 23, 42, 0.18);
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .premium-card-header {
+        padding: 15px 16px;
+    }
+
+    .premium-card-title {
+        font-size: 15px;
+    }
+
+    .premium-card-subtitle {
+        font-size: 10.5px;
+        margin-top: 4px;
+    }
+
+}
+        </style>
+
     {{-- Filter Section --}}
     <div class="py-4">
         <div class="max-w-12xl ">
@@ -458,42 +968,141 @@
 
     {{-- Summary Table --}}
     <div class="py-2">
-        <div class="max-w-6xl ">
-            <div class="premium-card">
-                <div class="premium-card-header">
-                    <h3 class="premium-card-title">Program Wise Summary</h3>
-                    <p class="premium-card-subtitle">Quick overview of event counts by program code and review status.</p>
+    <div class="max-w-6xl">
+
+        <div class="premium-card">
+
+            <!-- Header / Click Area -->
+            <div
+                class="premium-card-header d-flex justify-content-between align-items-center"
+                data-bs-toggle="collapse"
+                data-bs-target="#programWiseSummary"
+                aria-expanded="false"
+                aria-controls="programWiseSummary"
+                style="cursor:pointer;"
+            >
+
+                <div>
+                    <h3 class="premium-card-title mb-1">
+                        Program Wise Summary
+                    </h3>
+
+                    <p class="premium-card-subtitle mb-0">
+                        Quick overview of event counts by program code and review status.
+                    </p>
                 </div>
 
+                <!-- Click to See -->
+                <div class="summary-toggle-btn">
+                    <span class="summary-toggle-text">
+                        Click to See
+                    </span>
+
+                    <span class="summary-toggle-icon">
+                        ▼
+                    </span>
+                </div>
+
+            </div>
+
+
+            <!-- Collapsible Content -->
+            <div
+                class="collapse"
+                id="programWiseSummary"
+            >
+
                 <div class="premium-card-body" style="overflow-x:auto;">
+
                     <table class="table premium-table premium-summary-table mb-0">
+
                         <thead>
                             <tr>
-                                <th style="text-align:center;">Program Code</th>
-                                <th style="text-align:center;">Total Event</th>
-                                <th style="text-align:center;">Total Open</th>
-                                <th style="text-align:center;">Total Return</th>
-                                <th style="text-align:center;">Total Rejected</th>
-                                <th style="text-align:center;">Total Accepted</th>
+                                <th style="text-align:center;">
+                                    Program Code
+                                </th>
+
+                                <th style="text-align:center;">
+                                    Total Event
+                                </th>
+
+                                <th style="text-align:center;">
+                                    Total Open
+                                </th>
+
+                                <th style="text-align:center;">
+                                    Total Return
+                                </th>
+
+                                <th style="text-align:center;">
+                                    Total Rejected
+                                </th>
+
+                                <th style="text-align:center;">
+                                    Total Accepted
+                                </th>
                             </tr>
                         </thead>
+
+
                         <tbody>
+
                             @foreach($statusCounts as $item)
+
                                 <tr style="font-size:13px">
-                                    <td align="center"><strong>{{ $item->program_name }}</strong></td>
-                                    <td align="center"><strong>{{ $item->total }}</strong></td>
-                                    <td align="center"><strong>{{ $item->open_count }}</strong></td>
-                                    <td align="center"><strong>{{ $item->return_count }}</strong></td>
-                                    <td align="center"><strong>{{ $item->rejected_count }}</strong></td>
-                                    <td align="center"><strong>{{ $item->accepted_count }}</strong></td>
+
+                                    <td align="center">
+                                        <strong>
+                                            {{ $item->program_name }}
+                                        </strong>
+                                    </td>
+
+                                    <td align="center">
+                                        <strong>
+                                            {{ $item->total }}
+                                        </strong>
+                                    </td>
+
+                                    <td align="center">
+                                        <strong>
+                                            {{ $item->open_count }}
+                                        </strong>
+                                    </td>
+
+                                    <td align="center">
+                                        <strong>
+                                            {{ $item->return_count }}
+                                        </strong>
+                                    </td>
+
+                                    <td align="center">
+                                        <strong>
+                                            {{ $item->rejected_count }}
+                                        </strong>
+                                    </td>
+
+                                    <td align="center">
+                                        <strong>
+                                            {{ $item->accepted_count }}
+                                        </strong>
+                                    </td>
+
                                 </tr>
+
                             @endforeach
+
                         </tbody>
+
                     </table>
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
+</div>
 
     {{-- Main Listing --}}
     <div class="py-2">

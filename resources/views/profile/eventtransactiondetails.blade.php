@@ -267,6 +267,9 @@
             }
         }
     </style>
+    <style>
+    
+    </style>
 
     <div class="py-12 event-premium-shell">
         <div class="max-w-12xl mx-auto sm:px-6 lg:px-8 space-y-6">
