@@ -1,9 +1,8 @@
 <?php
-
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Log;
+use Illuminate\Support\Facades\Log;
 
 class MysqlBackup extends Command
 {
@@ -19,69 +18,218 @@ class MysqlBackup extends Command
      *
      * @var string
      */
-    protected $description = 'Create MySQL database backup';
-
-
-   
+    protected $description = 'Create MySQL database backups';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        
-        $dbName = env('DB_DATABASE');
-        $dbUser = env('DB_USERNAME');
-        $dbPass = env('DB_PASSWORD');
-        $dbHost = env('DB_HOST');
-
         $backupPath = storage_path('app/backups');
 
-        if (!file_exists($backupPath)) {
+        // Create backup directory if it doesn't exist
+        if (!is_dir($backupPath)) {
             mkdir($backupPath, 0755, true);
         }
 
-        // Delete old .sql.gz backup files
-        $files = glob($backupPath . '/*.sql.gz');
-
-        foreach ($files as $file) {
+        /*
+         * Delete old backup files
+         */
+        foreach (glob($backupPath . '/*.sql.gz') as $file) {
             if (is_file($file)) {
                 unlink($file);
             }
         }
 
-        $fileName = $dbName . '_' . date('Y-m-d_H-i-s') . '.sql.gz';
-        $fullPath = $backupPath . '/' . $fileName;
+        /*
+         * ============================
+         * FIRST DATABASE
+         * ============================
+         */
+        $dbName = env('DB_DATABASE');
+        $dbUser = env('DB_USERNAME');
+        $dbPass = env('DB_PASSWORD');
+        $dbHost = env('DB_HOST');
+        $dbPort = env('DB_PORT', 3306);
 
-        $command = "mysqldump --user={$dbUser} --password={$dbPass} --host={$dbHost} {$dbName} > {$fullPath}";
+        $fileName1 = $dbName . '_' . date('Y-m-d_H-i-s') . '.sql.gz';
+        $fullPath1 = $backupPath . '/' . $fileName1;
 
-        system($command);
+        $result1 = $this->createBackup(
+            $dbName,
+            $dbUser,
+            $dbPass,
+            $dbHost,
+            $dbPort,
+            $fullPath1
+        );
 
-        //Another Database
+        if (!$result1) {
+            $this->error("First database backup failed: {$dbName}");
+            Log::error("MySQL backup failed", [
+                'database' => $dbName,
+            ]);
 
+            return Command::FAILURE;
+        }
+
+        $this->info("Backup created: {$fileName1}");
+
+        /*
+         * ============================
+         * SECOND DATABASE
+         * ============================
+         */
         $dbName2 = env('DB_SECOND_DATABASE');
         $dbUser2 = env('DB_SECOND_USERNAME');
         $dbPass2 = env('DB_SECOND_PASSWORD');
         $dbHost2 = env('DB_SECOND_HOST');
+        $dbPort2 = env('DB_SECOND_PORT', 3306);
 
-        $backupPath = storage_path('app/backups');
+        $fileName2 = $dbName2 . '_' . date('Y-m-d_H-i-s') . '.sql.gz';
+        $fullPath2 = $backupPath . '/' . $fileName2;
 
-        if (!file_exists($backupPath)) {
-            mkdir($backupPath, 0755, true);
+        $result2 = $this->createBackup(
+            $dbName2,
+            $dbUser2,
+            $dbPass2,
+            $dbHost2,
+            $dbPort2,
+            $fullPath2
+        );
+
+        if (!$result2) {
+            $this->error("Second database backup failed: {$dbName2}");
+            Log::error("MySQL backup failed", [
+                'database' => $dbName2,
+            ]);
+
+            return Command::FAILURE;
         }
 
-        $fileName = $dbName2 . '_' . date('Y-m-d_H-i-s') . '.sql.gz';
-        $fullPath = $backupPath . '/' . $fileName;
+        $this->info("Backup created: {$fileName2}");
 
-        $command = "mysqldump --user={$dbUser2} --password={$dbPass2} --host={$dbHost2} {$dbName2}  | gzip > {$fullPath}";
+        Log::info('MySQL backups created successfully.', [
+            'database_1' => $dbName,
+            'database_2' => $dbName2,
+            'backup_path' => $backupPath,
+        ]);
 
-        system($command);
+        $this->info('All database backups completed successfully.');
 
-        //$this->uploadToDrive($fullPath);
-
-        $this->info("Backup created: " . $fileName);
-        \Log::info('Backup uploaded successfully.');
-
+        return Command::SUCCESS;
     }
 
+    /**
+     * Create a compressed MySQL backup.
+     */
+    private function createBackup(
+        string $dbName,
+        string $dbUser,
+        string $dbPass,
+        string $dbHost,
+        string $dbPort,
+        string $backupFile
+    ): bool {
+        /*
+         * Temporary MySQL configuration file.
+         *
+         * This prevents the password from appearing
+         * on the command line.
+         */
+        $configFile = tempnam(sys_get_temp_dir(), 'mysql_backup_');
+
+        if ($configFile === false) {
+            $this->error('Unable to create temporary MySQL config file.');
+
+            return false;
+        }
+
+        /*
+         * Write MySQL credentials.
+         */
+        $configContent = "[client]\n";
+        $configContent .= "user=" . $dbUser . "\n";
+        $configContent .= "password=" . $dbPass . "\n";
+        $configContent .= "host=" . $dbHost . "\n";
+        $configContent .= "port=" . $dbPort . "\n";
+
+        file_put_contents($configFile, $configContent);
+
+        /*
+         * Protect credentials.
+         */
+        chmod($configFile, 0600);
+
+        /*
+         * Escape paths/database names.
+         */
+        $configFileEscaped = escapeshellarg($configFile);
+        $dbNameEscaped = escapeshellarg($dbName);
+        $backupFileEscaped = escapeshellarg($backupFile);
+
+        /*
+         * mysqldump + gzip.
+         */
+        $command =
+            "mysqldump " .
+            "--defaults-extra-file={$configFileEscaped} " .
+            "--single-transaction " .
+            "--routines " .
+            "--triggers " .
+            "--events " .
+            "{$dbNameEscaped} | gzip > {$backupFileEscaped}";
+
+        /*
+         * Execute command.
+         */
+        $output = [];
+        $returnCode = 0;
+
+        exec($command, $output, $returnCode);
+
+        /*
+         * Delete temporary credentials file.
+         */
+        unlink($configFile);
+
+        /*
+         * Check command result.
+         */
+        if ($returnCode !== 0) {
+            $this->error("mysqldump failed for database: {$dbName}");
+
+            Log::error('mysqldump command failed', [
+                'database' => $dbName,
+                'return_code' => $returnCode,
+                'output' => $output,
+            ]);
+
+            /*
+             * Remove incomplete backup.
+             */
+            if (file_exists($backupFile)) {
+                unlink($backupFile);
+            }
+
+            return false;
+        }
+
+        /*
+         * Check that backup exists and isn't empty.
+         */
+        if (!file_exists($backupFile) || filesize($backupFile) === 0) {
+            $this->error("Backup file is empty: {$backupFile}");
+
+            if (file_exists($backupFile)) {
+                unlink($backupFile);
+            }
+
+            return false;
+        }
+
+        return true;
+    }
 }
+
+
