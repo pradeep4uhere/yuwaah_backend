@@ -73,6 +73,10 @@ class MysqlBackup extends Command
         return Command::SUCCESS;
     }
 
+
+
+
+
     /**
      * Create compressed MySQL backup.
      */
@@ -206,6 +210,10 @@ class MysqlBackup extends Command
                 $this->formatBytes(filesize($finalFile)) .
                 ")"
             );
+
+            if (!$this->uploadToS3($finalFile)) {
+                return false;
+            }
     
             return true;
     
@@ -257,4 +265,49 @@ class MysqlBackup extends Command
 
         return $bytes . ' bytes';
     }
+
+
+
+    private function uploadToS3(string $filePath): bool
+    {
+        $bucket = env('AWS_BACKUP_BUCKET', 'backup-siif-pg');
+        $path = env('AWS_BACKUP_PATH', 'testing/mysql-backups');
+
+        $fileName = basename($filePath);
+
+        $s3Path = "s3://{$bucket}/{$path}/{$fileName}";
+
+        $command = sprintf(
+            'aws s3 cp %s %s',
+            escapeshellarg($filePath),
+            escapeshellarg($s3Path)
+        );
+
+        $output = [];
+
+        exec($command, $output, $returnCode);
+
+        if ($returnCode !== 0) {
+            $this->error(
+                "S3 upload failed: {$fileName}"
+            );
+
+            if (!empty($output)) {
+                $this->error(implode(PHP_EOL, $output));
+            }
+
+            return false;
+        }
+
+        $this->info(
+            "Uploaded to S3: {$s3Path}"
+        );
+
+        return true;
+    }
+
+
+
+
+
 }
