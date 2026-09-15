@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
@@ -6,114 +7,66 @@ use Illuminate\Support\Facades\Log;
 
 class MysqlBackup extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'backup:mysql';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Create MySQL database backups';
+    protected $description = 'Backup MySQL databases and compress them';
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
-        $backupPath = storage_path('app/backups');
+        $backupPath = storage_path('app/backups/mysql');
 
-        // Create backup directory if it doesn't exist
         if (!is_dir($backupPath)) {
             mkdir($backupPath, 0755, true);
         }
 
         /*
-         * Delete old backup files
+         * Delete old backups
          */
-        foreach (glob($backupPath . '/*.sql.gz') as $file) {
-            if (is_file($file)) {
-                unlink($file);
-            }
+        foreach (glob($backupPath . '/*.sql.gz') as $oldFile) {
+            @unlink($oldFile);
         }
 
         /*
-         * ============================
-         * FIRST DATABASE
-         * ============================
+         * Database 1
          */
-        $dbName = env('DB_DATABASE');
-        $dbUser = env('DB_USERNAME');
-        $dbPass = env('DB_PASSWORD');
-        $dbHost = env('DB_HOST');
-        $dbPort = env('DB_PORT', 3306);
-
-        $fileName1 = $dbName . '_' . date('Y-m-d_H-i-s') . '.sql.gz';
-        $fullPath1 = $backupPath . '/' . $fileName1;
-
-        $result1 = $this->createBackup(
-            $dbName,
-            $dbUser,
-            $dbPass,
-            $dbHost,
-            $dbPort,
-            $fullPath1
+        $db1Success = $this->createBackup(
+            config('database.connections.mysql.host'),
+            config('database.connections.mysql.port'),
+            config('database.connections.mysql.username'),
+            config('database.connections.mysql.password'),
+            config('database.connections.mysql.database'),
+            $backupPath
         );
 
-        if (!$result1) {
-            $this->error("First database backup failed: {$dbName}");
-            Log::error("MySQL backup failed", [
-                'database' => $dbName,
-            ]);
+        if (!$db1Success) {
+            $this->error(
+                'First database backup failed: ' .
+                config('database.connections.mysql.database')
+            );
 
             return Command::FAILURE;
         }
 
-        $this->info("Backup created: {$fileName1}");
-
         /*
-         * ============================
-         * SECOND DATABASE
-         * ============================
+         * Database 2
          */
-        $dbName2 = env('DB_SECOND_DATABASE');
-        $dbUser2 = env('DB_SECOND_USERNAME');
-        $dbPass2 = env('DB_SECOND_PASSWORD');
-        $dbHost2 = env('DB_SECOND_HOST');
-        $dbPort2 = env('DB_SECOND_PORT', 3306);
-
-        $fileName2 = $dbName2 . '_' . date('Y-m-d_H-i-s') . '.sql.gz';
-        $fullPath2 = $backupPath . '/' . $fileName2;
-
-        $result2 = $this->createBackup(
-            $dbName2,
-            $dbUser2,
-            $dbPass2,
-            $dbHost2,
-            $dbPort2,
-            $fullPath2
+        $db2Success = $this->createBackup(
+            config('database.connections.mysql2.host'),
+            config('database.connections.mysql2.port'),
+            config('database.connections.mysql2.username'),
+            config('database.connections.mysql2.password'),
+            config('database.connections.mysql2.database'),
+            $backupPath
         );
 
-        if (!$result2) {
-            $this->error("Second database backup failed: {$dbName2}");
-            Log::error("MySQL backup failed", [
-                'database' => $dbName2,
-            ]);
+        if (!$db2Success) {
+            $this->error(
+                'Second database backup failed: ' .
+                config('database.connections.mysql2.database')
+            );
 
             return Command::FAILURE;
         }
-
-        $this->info("Backup created: {$fileName2}");
-
-        Log::info('MySQL backups created successfully.', [
-            'database_1' => $dbName,
-            'database_2' => $dbName2,
-            'backup_path' => $backupPath,
-        ]);
 
         $this->info('All database backups completed successfully.');
 
@@ -121,132 +74,243 @@ class MysqlBackup extends Command
     }
 
     /**
-     * Create a compressed MySQL backup.
+     * Create compressed MySQL backup.
      */
     private function createBackup(
-        string $dbName,
-        string $dbUser,
-        string $dbPass,
-        string $dbHost,
-        string $dbPort,
-        string $backupFile
-    ): bool {
-        // Create temporary MySQL config
-        $configFile = tempnam(sys_get_temp_dir(), 'mysql_backup_');
-    
-        if ($configFile === false) {
-            $this->error('Unable to create temporary MySQL config file.');
-            return false;
-        }
-    
-        // MySQL credentials
-        $configContent = "[client]\n";
-        $configContent .= "user=" . $dbUser . "\n";
-        $configContent .= "password=" . $dbPass . "\n";
-        $configContent .= "host=" . $dbHost . "\n";
-        $configContent .= "port=" . $dbPort . "\n";
-    
-        file_put_contents($configFile, $configContent);
-        chmod($configFile, 0600);
-    
-        // Temporary SQL file
-        $tempSqlFile = $backupFile . '.tmp.sql';
-    
+        $dbHost,
+        $dbPort,
+        $dbUser,
+        $dbPass,
+        $dbName,
+        $backupPath
+    ) {
+        $timestamp = now()->format('Y-m-d_H-i-s');
+
+        $finalFile = $backupPath . '/' .
+            $dbName . '_' . $timestamp . '.sql.gz';
+
         /*
-         * IMPORTANT:
-         * --defaults-extra-file must be the FIRST option
-         * after mysqldump.
+         * Temporary files
          */
-        $command = sprintf(
-            'mysqldump --defaults-extra-file=%s --no-tablespaces --single-transaction --routines --triggers --events %s > %s 2>&1',
-            escapeshellarg($configFile),
-            escapeshellarg($dbName),
-            escapeshellarg($tempSqlFile)
-        );
-    
-        $output = [];
-        $returnCode = 0;
-    
-        exec($command, $output, $returnCode);
-    
-        // Remove credentials immediately
-        if (file_exists($configFile)) {
-            unlink($configFile);
-        }
-    
-        // Check mysqldump
-        if ($returnCode !== 0) {
-    
-            $this->error("mysqldump failed for database: {$dbName}");
-    
-            Log::error('mysqldump failed', [
-                'database' => $dbName,
-                'return_code' => $returnCode,
-                'output' => $output,
-            ]);
-    
+        $configFile = tempnam(sys_get_temp_dir(), 'mysql_backup_');
+        $tempSqlFile = tempnam(sys_get_temp_dir(), 'mysql_sql_');
+        $errorFile = tempnam(sys_get_temp_dir(), 'mysql_error_');
+
+        try {
+
+            /*
+             * Validate credentials
+             */
+            if (empty($dbUser) || empty($dbPass) || empty($dbName)) {
+                throw new \RuntimeException(
+                    "Missing database configuration for {$dbName}"
+                );
+            }
+
+            /*
+             * Create temporary MySQL configuration.
+             *
+             * IMPORTANT:
+             * No password appears in the shell command.
+             */
+            $configContent =
+                "[client]\n" .
+                "user=" . $dbUser . "\n" .
+                "password=" . $dbPass . "\n" .
+                "host=" . $dbHost . "\n" .
+                "port=" . $dbPort . "\n";
+
+            if (file_put_contents($configFile, $configContent) === false) {
+                throw new \RuntimeException(
+                    "Unable to create temporary MySQL config file."
+                );
+            }
+
+            chmod($configFile, 0600);
+
+            /*
+             * mysqldump
+             *
+             * --no-tablespaces avoids PROCESS privilege requirement.
+             */
+            $command = sprintf(
+                'mysqldump ' .
+                '--defaults-extra-file=%s ' .
+                '--no-tablespaces ' .
+                '--single-transaction ' .
+                '--routines ' .
+                '--triggers ' .
+                '--events ' .
+                '%s > %s 2> %s',
+                escapeshellarg($configFile),
+                escapeshellarg($dbName),
+                escapeshellarg($tempSqlFile),
+                escapeshellarg($errorFile)
+            );
+
+            $output = [];
+
+            exec($command, $output, $returnCode);
+
+            /*
+             * Read mysqldump error output.
+             */
+            $errorOutput = '';
+
+            if (file_exists($errorFile)) {
+                $errorOutput = trim(file_get_contents($errorFile));
+            }
+
+            /*
+             * Check mysqldump result.
+             */
+            if ($returnCode !== 0) {
+
+                $this->error(
+                    "mysqldump failed for database: {$dbName}"
+                );
+
+                if (!empty($errorOutput)) {
+                    $this->error($errorOutput);
+
+                    Log::error(
+                        "MySQL backup failed",
+                        [
+                            'database' => $dbName,
+                            'error' => $errorOutput,
+                        ]
+                    );
+                }
+
+                return false;
+            }
+
+            /*
+             * Verify SQL dump exists and isn't empty.
+             */
+            if (
+                !file_exists($tempSqlFile) ||
+                filesize($tempSqlFile) === 0
+            ) {
+                $this->error(
+                    "mysqldump created an empty backup for: {$dbName}"
+                );
+
+                return false;
+            }
+
+            /*
+             * Compress SQL dump.
+             *
+             * gzip -c keeps the original temporary SQL file intact
+             * until compression succeeds.
+             */
+            $gzipCommand = sprintf(
+                'gzip -c %s > %s',
+                escapeshellarg($tempSqlFile),
+                escapeshellarg($finalFile)
+            );
+
+            $gzipOutput = [];
+
+            exec(
+                $gzipCommand,
+                $gzipOutput,
+                $gzipReturnCode
+            );
+
+            if ($gzipReturnCode !== 0) {
+
+                $this->error(
+                    "gzip failed for database: {$dbName}"
+                );
+
+                @unlink($finalFile);
+
+                return false;
+            }
+
+            /*
+             * Verify final backup.
+             */
+            if (
+                !file_exists($finalFile) ||
+                filesize($finalFile) === 0
+            ) {
+                $this->error(
+                    "Final backup file is missing or empty: {$dbName}"
+                );
+
+                @unlink($finalFile);
+
+                return false;
+            }
+
+            $size = filesize($finalFile);
+
+            $this->info(
+                "Backup created: " .
+                basename($finalFile) .
+                " (" .
+                $this->formatBytes($size) .
+                ")"
+            );
+
+            return true;
+
+        } catch (\Throwable $e) {
+
+            $this->error(
+                "Backup exception for {$dbName}: " .
+                $e->getMessage()
+            );
+
+            Log::error(
+                "MySQL backup exception",
+                [
+                    'database' => $dbName,
+                    'error' => $e->getMessage(),
+                ]
+            );
+
+            return false;
+
+        } finally {
+
+            /*
+             * Always remove temporary credential/config files.
+             */
+            if (file_exists($configFile)) {
+                @unlink($configFile);
+            }
+
             if (file_exists($tempSqlFile)) {
-                unlink($tempSqlFile);
+                @unlink($tempSqlFile);
             }
-    
-            return false;
-        }
-    
-        // Check SQL file
-        if (!file_exists($tempSqlFile) || filesize($tempSqlFile) === 0) {
-    
-            $this->error("Backup SQL file is empty: {$dbName}");
-    
-            if (file_exists($tempSqlFile)) {
-                unlink($tempSqlFile);
+
+            if (file_exists($errorFile)) {
+                @unlink($errorFile);
             }
-    
-            return false;
         }
-    
-        // Compress SQL
-        $gzipCommand = sprintf(
-            'gzip -c %s > %s',
-            escapeshellarg($tempSqlFile),
-            escapeshellarg($backupFile)
-        );
-    
-        $gzipOutput = [];
-        $gzipReturnCode = 0;
-    
-        exec($gzipCommand, $gzipOutput, $gzipReturnCode);
-    
-        // Remove temporary SQL
-        if (file_exists($tempSqlFile)) {
-            unlink($tempSqlFile);
-        }
-    
-        if ($gzipReturnCode !== 0) {
-    
-            $this->error("gzip failed for database: {$dbName}");
-    
-            if (file_exists($backupFile)) {
-                unlink($backupFile);
-            }
-    
-            return false;
-        }
-    
-        // Final validation
-        if (!file_exists($backupFile) || filesize($backupFile) === 0) {
-    
-            $this->error("Backup file is empty: {$dbName}");
-    
-            if (file_exists($backupFile)) {
-                unlink($backupFile);
-            }
-    
-            return false;
-        }
-    
-        return true;
     }
-    
+
+    /**
+     * Convert bytes to readable format.
+     */
+    private function formatBytes($bytes)
+    {
+        if ($bytes >= 1073741824) {
+            return round($bytes / 1073741824, 2) . ' GB';
+        }
+
+        if ($bytes >= 1048576) {
+            return round($bytes / 1048576, 2) . ' MB';
+        }
+
+        if ($bytes >= 1024) {
+            return round($bytes / 1024, 2) . ' KB';
+        }
+
+        return $bytes . ' bytes';
+    }
 }
-
-
