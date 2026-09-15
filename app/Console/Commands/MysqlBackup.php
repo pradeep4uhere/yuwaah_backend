@@ -131,9 +131,7 @@ class MysqlBackup extends Command
         string $dbPort,
         string $backupFile
     ): bool {
-        /*
-         * Temporary MySQL configuration file
-         */
+        // Create temporary MySQL config
         $configFile = tempnam(sys_get_temp_dir(), 'mysql_backup_');
     
         if ($configFile === false) {
@@ -141,9 +139,7 @@ class MysqlBackup extends Command
             return false;
         }
     
-        /*
-         * Write MySQL credentials
-         */
+        // MySQL credentials
         $configContent = "[client]\n";
         $configContent .= "user=" . $dbUser . "\n";
         $configContent .= "password=" . $dbPass . "\n";
@@ -151,56 +147,39 @@ class MysqlBackup extends Command
         $configContent .= "port=" . $dbPort . "\n";
     
         file_put_contents($configFile, $configContent);
-    
-        // Protect credentials
         chmod($configFile, 0600);
     
-        /*
-         * Temporary SQL file
-         */
+        // Temporary SQL file
         $tempSqlFile = $backupFile . '.tmp.sql';
     
         /*
-         * Escape values
+         * IMPORTANT:
+         * --defaults-extra-file must be the FIRST option
+         * after mysqldump.
          */
-        $configFileEscaped = escapeshellarg($configFile);
-        $dbNameEscaped = escapeshellarg($dbName);
-        $tempSqlFileEscaped = escapeshellarg($tempSqlFile);
-        $backupFileEscaped = escapeshellarg($backupFile);
-    
-        /*
-         * Step 1:
-         * Run mysqldump WITHOUT gzip.
-         */
-        $command = "mysqldump " .
-            "--defaults-extra-file={$configFileEscaped} " .
-            "--single-transaction " .
-            "--no-tablespaces " .
-            "--routines " .
-            "--triggers " .
-            "--events " .
-            "{$dbNameEscaped} > {$tempSqlFileEscaped}";
+        $command = sprintf(
+            'mysqldump --defaults-extra-file=%s --no-tablespaces --single-transaction --routines --triggers --events %s > %s 2>&1',
+            escapeshellarg($configFile),
+            escapeshellarg($dbName),
+            escapeshellarg($tempSqlFile)
+        );
     
         $output = [];
         $returnCode = 0;
     
         exec($command, $output, $returnCode);
     
-        /*
-         * Remove credentials immediately
-         */
+        // Remove credentials immediately
         if (file_exists($configFile)) {
             unlink($configFile);
         }
     
-        /*
-         * Check mysqldump result
-         */
+        // Check mysqldump
         if ($returnCode !== 0) {
     
             $this->error("mysqldump failed for database: {$dbName}");
     
-            Log::error('mysqldump command failed', [
+            Log::error('mysqldump failed', [
                 'database' => $dbName,
                 'return_code' => $returnCode,
                 'output' => $output,
@@ -213,12 +192,10 @@ class MysqlBackup extends Command
             return false;
         }
     
-        /*
-         * Make sure SQL file exists
-         */
+        // Check SQL file
         if (!file_exists($tempSqlFile) || filesize($tempSqlFile) === 0) {
     
-            $this->error("mysqldump created an empty file: {$dbName}");
+            $this->error("Backup SQL file is empty: {$dbName}");
     
             if (file_exists($tempSqlFile)) {
                 unlink($tempSqlFile);
@@ -227,37 +204,26 @@ class MysqlBackup extends Command
             return false;
         }
     
-        /*
-         * Step 2:
-         * Compress SQL file.
-         */
-        $gzipCommand =
-            "gzip -c {$tempSqlFileEscaped} > {$backupFileEscaped}";
+        // Compress SQL
+        $gzipCommand = sprintf(
+            'gzip -c %s > %s',
+            escapeshellarg($tempSqlFile),
+            escapeshellarg($backupFile)
+        );
     
         $gzipOutput = [];
         $gzipReturnCode = 0;
     
         exec($gzipCommand, $gzipOutput, $gzipReturnCode);
     
-        /*
-         * Delete temporary SQL file
-         */
+        // Remove temporary SQL
         if (file_exists($tempSqlFile)) {
             unlink($tempSqlFile);
         }
     
-        /*
-         * Check gzip result
-         */
         if ($gzipReturnCode !== 0) {
     
             $this->error("gzip failed for database: {$dbName}");
-    
-            Log::error('gzip backup failed', [
-                'database' => $dbName,
-                'return_code' => $gzipReturnCode,
-                'output' => $gzipOutput,
-            ]);
     
             if (file_exists($backupFile)) {
                 unlink($backupFile);
@@ -266,9 +232,7 @@ class MysqlBackup extends Command
             return false;
         }
     
-        /*
-         * Final backup validation
-         */
+        // Final validation
         if (!file_exists($backupFile) || filesize($backupFile) === 0) {
     
             $this->error("Backup file is empty: {$dbName}");
@@ -282,6 +246,7 @@ class MysqlBackup extends Command
     
         return true;
     }
+    
 }
 
 
