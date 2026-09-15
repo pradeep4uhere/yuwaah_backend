@@ -175,6 +175,7 @@ class MysqlBackup extends Command
         $command = "mysqldump " .
             "--defaults-extra-file={$configFileEscaped} " .
             "--single-transaction " .
+            "--no-tablespaces " .
             "--routines " .
             "--triggers " .
             "--events " .
