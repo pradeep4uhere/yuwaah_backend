@@ -171,7 +171,10 @@ class MysqlBackup extends Command
         /*
          * mysqldump + gzip.
          */
+       
+
         $command =
+            "set -o pipefail; " .
             "mysqldump " .
             "--defaults-extra-file={$configFileEscaped} " .
             "--single-transaction " .
@@ -179,7 +182,6 @@ class MysqlBackup extends Command
             "--triggers " .
             "--events " .
             "{$dbNameEscaped} | gzip > {$backupFileEscaped}";
-
         /*
          * Execute command.
          */
