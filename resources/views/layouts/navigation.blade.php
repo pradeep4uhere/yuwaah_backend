@@ -48,6 +48,10 @@ height: auto;
                        class="premium-nav-link {{ request()->routeIs('allusers') ? 'active' : '' }}">
                         Users
                     </a>
+                    <a href="{{ route('profile.uploadlearner') }}"
+                       class="premium-nav-link {{ request()->routeIs('uploadlearner') ? 'active' : '' }}">
+                        Upload Learner
+                    </a>
                 </div>
             </div>
 

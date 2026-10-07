@@ -19,6 +19,10 @@ use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 use App\Exports\EventTransactionExport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\LearnerImportTemplateExport;
+use App\Imports\LearnerImport;
+use App\Models\LearnerImport as LearnerImportLog;
+
 
 
 class ProfileController extends Controller
@@ -1535,7 +1539,33 @@ public function yuthHubApiList(Request $request){
 
 
 
+public function uploadLearnerForm(Request $request){
 
+    $todayImported = LearnerImportLog::whereDate('created_at', today())
+            ->sum('total_records');
+    
+        $todaySuccessful = LearnerImportLog::whereDate('created_at', today())
+            ->sum('success_count');
+    
+        $todayDuplicates = LearnerImportLog::whereDate('created_at', today())
+            ->sum('duplicate_count');
+    
+        $todayFailed = LearnerImportLog::whereDate('created_at', today())
+            ->sum('failed_count');
+    
+        $recentImports = LearnerImportLog::with('uploader')
+            ->latest()
+            ->take(10)
+            ->get();
+
+    return view('profile.upload_learner', [
+          'todayImported' => $todayImported,
+            'todaySuccessful' => $todaySuccessful,
+            'todayDuplicates' => $todayDuplicates,
+            'todayFailed' => $todayFailed,
+            'recentImports' => $recentImports,
+    ]);
+}
 
 
 
