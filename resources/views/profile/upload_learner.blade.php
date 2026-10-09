@@ -145,9 +145,9 @@
 
                             <option value="">Select Program</option>
 
-                            <option value="NMDC"
+                            <option value="NSDC-DGH"
                                 {{ old('program_code') === 'NMDC' ? 'selected' : '' }}>
-                                NMDC
+                                NSDC-DGH
                             </option>
 
                             {{-- Future Programs --}}
